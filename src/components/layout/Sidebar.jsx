@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { FaChartBar, FaUsers, FaBox, FaShoppingCart, FaProductHunt, FaCartPlus } from "react-icons/fa";
+import { RiAdminFill } from "react-icons/ri";
 import { FaBoxArchive } from "react-icons/fa6";
 
 export default function Sidebar() {
@@ -11,7 +12,11 @@ export default function Sidebar() {
 
   return (
     <div className="w-64 bg-white rounded-xl shadow p-4">
-      <h2 className="text-lg font-bold mb-6">Dashboard</h2>
+        
+      <div className="flex items-center gap-2 mb-6">
+        <RiAdminFill className="text-orange-500 text-2xl" />
+        <h2 className="text-lg font-bold">Admin</h2>
+      </div>
 
       <div className="flex flex-col gap-2">
         
