@@ -1,19 +1,22 @@
-// components/layout/Layout.jsx
 import Sidebar from "./Sidebar";
-
+import Topbar from "./Topbar";
 
 export default function Layout({ children }) {
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex bg-[#f5f5f5] min-h-screen">
+
+      {/* SIDEBAR */}
       <Sidebar />
 
-      <div className="flex-1 flex flex-col">
+      {/* MAIN */}
+      <div className="flex-1 p-6 overflow-y-auto">
 
+        <Topbar />
 
-        <main className="p-4">
-          {children}
-        </main>
+        {children}
+
       </div>
+
     </div>
   );
 }

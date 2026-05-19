@@ -23,4 +23,4 @@ export default function OrderItem({ id, name, price, status }) {
       </div>
     </div>
   );
-}
+}   
