@@ -11,7 +11,7 @@ export default function Analytics() {
         </h1>
 
         <p className="text-gray-500 mt-2">
-          Statistiques avancées marketplace
+          Statistiques Avancées 
         </p>
 
       </div>
@@ -24,7 +24,7 @@ export default function Analytics() {
             Revenus plateforme
           </h2>
 
-          <p className="text-3xl font-bold mt-3">
+          <p className="text-3xl font-bold mt-3 text-green-500">
             12.5M FCFA
           </p>
 
@@ -36,7 +36,7 @@ export default function Analytics() {
             Transactions
           </h2>
 
-          <p className="text-3xl font-bold mt-3">
+          <p className="text-3xl font-bold mt-3 text-blue-500">
             2,540
           </p>
 
@@ -48,7 +48,7 @@ export default function Analytics() {
             Utilisateurs actifs
           </h2>
 
-          <p className="text-3xl font-bold mt-3">
+          <p className="text-3xl font-bold mt-3 text-green-500">
             8,420
           </p>
 
@@ -60,7 +60,7 @@ export default function Analytics() {
             Croissance
           </h2>
 
-          <p className="text-3xl font-bold mt-3">
+          <p className="text-3xl font-bold mt-3 text-orange-500">
             +18%
           </p>
 
