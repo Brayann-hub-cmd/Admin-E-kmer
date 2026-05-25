@@ -7,6 +7,7 @@ import {
   FaWallet,
   FaStore,
   FaSignOutAlt,
+  FaUserCircle,
 } from "react-icons/fa";
 
 import { NavLink } from "react-router-dom";
@@ -69,8 +70,18 @@ export default function Sidebar() {
             Paramètres
           </NavLink>
 
-        </div>
+         <NavLink to="/analytics" className={linkClass}>
+          <FaChartBar />
+          Analytics
+        </NavLink>
 
+          <NavLink to="/utilisateurs" className={linkClass}>
+            <FaUserCircle />
+            Utilisateurs
+          </NavLink>
+  
+        </div>
+     
       </div>
 
       {/* BOTTOM */}

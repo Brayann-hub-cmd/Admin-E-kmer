@@ -5,6 +5,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
+import { Link } from "react-router-dom";
 
 const data = [
   { name: "Électronique", value: 35 },
@@ -23,7 +24,7 @@ const COLORS = [
 export default function SalesByCategory() {
 
   return (
-    <div className="bg-white rounded-3xl p-6 shadow-sm h-[420px] flex flex-col">
+    <div className="bg-white rounded-2xl p-6 shadow-sm h-[420px] flex flex-col">
 
       {/* HEADER */}
       <div className="mb-2">
@@ -91,12 +92,13 @@ export default function SalesByCategory() {
 
         {data.map((item, index) => (
 
-          <div
-            key={index}
-            className="flex items-center justify-between"
-          >
+        <Link
+  to="/categories"
+  key={index}
+  className="flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg transition-all"
+>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 ">
 
               <div
                 className="w-3 h-3 rounded-full"
@@ -115,7 +117,7 @@ export default function SalesByCategory() {
               {item.value}%
             </span>
 
-          </div>
+          </Link>
 
         ))}
 

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 const orders = [
   {
     id: "#ORD-2587",
@@ -33,9 +34,12 @@ export default function RecentOrders() {
           Commandes récentes
         </h2>
 
-        <button className="text-orange-500 font-medium">
-          Voir tout
-        </button>
+       <Link
+  to="/commandes"
+  className="text-orange-500 font-medium text-sm hover:text-orange-600 transition-colors"
+>
+  Voir tout
+</Link>
       </div>
 
       <div className="space-y-5">

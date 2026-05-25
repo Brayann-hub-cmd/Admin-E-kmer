@@ -45,7 +45,7 @@ const data = [
   },
 ];
 
-export default function SalesChart() {
+export default function MarketplaceActivityChart() {
   return (
     <div className="bg-white rounded-3xl p-6 shadow-sm flex-1">
 
@@ -55,11 +55,11 @@ export default function SalesChart() {
         <div>
 
           <h2 className="text-2xl font-bold text-gray-900">
-            Vue d'ensemble des ventes
+            Activité de la marketplace
           </h2>
 
           <p className="text-gray-500 text-sm mt-1">
-            Performance globale marketplace
+            Suivi global des transactions et échanges
           </p>
 
         </div>

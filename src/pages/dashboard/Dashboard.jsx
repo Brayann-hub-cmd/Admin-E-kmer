@@ -1,5 +1,5 @@
 import StatsCards from "../../components/dashboard/StatsCards";
-import SalesChart from "../../components/dashboard/SalesChart";
+import MarketplaceActivityChart from "../../components/dashboard/MarketplaceActivityChart";
 import RecentOrders from "../../components/dashboard/RecentOrders";
 import TopProducts from "../../components/dashboard/TopProducts";
 import RecentActivities from "../../components/dashboard/RecentActivities";
@@ -14,7 +14,7 @@ export default function Dashboard() {
       {/* CHART + ORDERS */}
       <div className="flex flex-col xl:flex-row gap-6 mb-6">
 
-        <SalesChart />
+        <MarketplaceActivityChart />
 
         <RecentOrders />
 

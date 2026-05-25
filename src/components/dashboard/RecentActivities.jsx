@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   FaShoppingCart,
   FaStore,
@@ -13,6 +14,7 @@ const activities = [
     title: "Nouvelle commande",
     description: "Commande #ORD-2587 validée",
     time: "Il y a 2 min",
+    link: "/commandes"
   },
 
   {
@@ -22,6 +24,7 @@ const activities = [
     title: "Nouvelle boutique",
     description: "TechStore a rejoint la marketplace",
     time: "Il y a 10 min",
+    link: "/boutiques"
   },
 
   {
@@ -31,6 +34,7 @@ const activities = [
     title: "Nouvel utilisateur",
     description: "Fatou Ndiaye vient de créer un compte",
     time: "Il y a 25 min",
+    link: "/utilisateurs"
   },
 
   {
@@ -40,12 +44,13 @@ const activities = [
     title: "Produit publié",
     description: "iPhone 15 ajouté par MobileShop",
     time: "Il y a 40 min",
+    link: "/produits"
   },
 ];
 
 export default function RecentActivities() {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm h-[420px]">
+    <div className="bg-white rounded-2xl p-6 shadow-sm h-[420px] flex flex-col overflow-hidden">
 
       <div className="mb-6">
 
@@ -58,16 +63,15 @@ export default function RecentActivities() {
         </p>
 
       </div>
-
-      <div className="space-y-5">
+      <div className="space-y-5 overflow-y-auto pr-2 flex-1">
 
         {activities.map((activity) => (
 
-          <div
+          <Link
+            to={activity.link}
             key={activity.id}
-            className="flex items-start gap-4"
+            className="flex items-start gap-4 hover:bg-gray-50 p-2 rounded-xl transition-all"
           >
-
             <div
               className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg ${activity.color}`}
             >
@@ -75,7 +79,6 @@ export default function RecentActivities() {
             </div>
 
             <div className="flex-1">
-
               <h3 className="font-semibold text-sm">
                 {activity.title}
               </h3>
@@ -87,10 +90,8 @@ export default function RecentActivities() {
               <span className="text-xs text-gray-400 mt-2 block">
                 {activity.time}
               </span>
-
             </div>
-
-          </div>
+          </Link>
 
         ))}
 
