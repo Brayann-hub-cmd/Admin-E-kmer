@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Layout from "../../components/layout/Layout";
 import {
   FaTrash,
   FaUserCircle,
@@ -122,7 +121,7 @@ export default function Users() {
   };
 
   return (
-    <Layout>
+    <div>
 
       {/* HEADER */}
       <div className="flex items-center justify-between mb-8">
@@ -389,6 +388,6 @@ export default function Users() {
         )
       }
 
-    </Layout>
+    </div>
   );
 }

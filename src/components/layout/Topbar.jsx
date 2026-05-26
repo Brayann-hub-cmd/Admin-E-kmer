@@ -38,7 +38,7 @@ export default function Topbar() {
 
   {/* PROFIL */}
   <Link
-    to="/profil"
+    to="/profile"
     className="flex items-center gap-2 hover:text-orange-500 transition-colors"
   >
 

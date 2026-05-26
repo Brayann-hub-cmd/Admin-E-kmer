@@ -18,7 +18,7 @@ export default function Settings() {
         </h1>
 
         <p className="text-gray-500 mt-2">
-          Configuration générale de la marketplace
+          Configuration générale et préférences de la plateforme
         </p>
 
       </div>
