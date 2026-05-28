@@ -6,6 +6,8 @@ import {
 } from "react-icons/fa";
 
 import StatCard from "../ui/StatCard";
+import api from "../../services/api";
+import { useEffect, useState } from "react";
 
 const stats = [
   {
@@ -42,6 +44,37 @@ const stats = [
 ];
 
 export default function StatsCards() {
+  const [panier,setPanier] = useState([])
+  const getTotalVentes = async () => {
+
+  }
+
+  const getNombreCommandes = async () =>{
+
+  }
+
+  const getUtilisateursActifs = async () =>{
+
+  }
+
+  const getMoyenPanier = async () =>{
+    try {
+      const res = await api.get("panier/")
+      console.log(res.data);
+      
+      setPanier(res.data)
+
+    } catch (error) {
+      console.log(error);
+      
+    }
+  }
+
+  useEffect(
+    ()=>{
+      getMoyenPanier()
+    },[]
+  )
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
 
