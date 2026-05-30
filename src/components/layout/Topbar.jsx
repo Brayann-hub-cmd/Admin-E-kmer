@@ -1,5 +1,9 @@
-import { FaBell, FaSearch } from "react-icons/fa";
+import {
+  FaBell,
+  FaUserCircle,FaSearch
+} from "react-icons/fa";
 
+import { Link } from "react-router-dom";
 export default function Topbar() {
   return (
     <div className="flex items-center justify-between mb-6">
@@ -16,37 +20,48 @@ export default function Topbar() {
       </div>
 
       {/* RIGHT */}
-      <div className="flex items-center gap-5">
+<div className="flex items-center gap-5">
 
-        {/* NOTIFICATION */}
-        <div className="relative cursor-pointer">
-          <FaBell className="text-2xl text-gray-700" />
+  {/* NOTIFICATION */}
+  <Link
+    to="/notifications"
+    className="relative hover:text-orange-500 transition-colors"
+  >
 
-          <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-            5
-          </span>
-        </div>
+    <FaBell className="text-xl" />
 
-        {/* PROFILE */}
-        <div className="flex items-center gap-3">
-          <img
-            src="https://randomuser.me/api/portraits/men/75.jpg"
-            alt=""
-            className="w-12 h-12 rounded-full object-cover"
-          />
+    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center">
+      3
+    </span>
 
-          <div>
-            <h3 className="font-semibold">
-              Admin
-            </h3>
+  </Link>
 
-            <p className="text-sm text-gray-500">
-              Administrateur
-            </p>
-          </div>
-        </div>
+  {/* PROFIL */}
+  <Link
+    to="/profil"
+    className="flex items-center gap-2 hover:text-orange-500 transition-colors"
+  >
 
-      </div>
+    <FaUserCircle className="text-3xl" />
+
+    <div>
+
+      <p className="text-sm font-semibold">
+        Admin
+      </p>
+
+      <span className="text-xs text-gray-500">
+        Super Admin
+      </span>
+
     </div>
+
+  </Link>
+
+</div> 
+</div>
+
+       
+    
   );
 }

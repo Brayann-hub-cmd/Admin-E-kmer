@@ -8,7 +8,10 @@ import Categories from "../pages/categories/Categories";
 import Sales from "../pages/sales/Sales";
 import Purchases from "../pages/purchases/Purchases";
 import Settings from "../pages/settings/Settings";
-
+import Notifications from "../pages/notifications/Notifications";
+import Profile from "../pages/profile/Profile";
+import Users from "../pages/users/Users";
+import Analytics from "../pages/analytics/Analytics";
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -75,6 +78,13 @@ export default function AppRouter() {
             </Layout>
           }
         />
+        <Route path="/notifications" element={<Notifications />} />
+
+        <Route path="/profil" element={<Profile />} />
+
+        <Route path="/utilisateurs" element={<Users />} />
+
+        <Route path="/analytics" element={<Analytics />} />
 
         {/* FALLBACK */}
         <Route

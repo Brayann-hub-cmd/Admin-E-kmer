@@ -6,8 +6,7 @@ import {
 } from "react-icons/fa";
 
 import StatCard from "../ui/StatCard";
-import api from "../../services/api";
-import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const stats = [
   {
@@ -16,6 +15,7 @@ const stats = [
     growth: "+18.5%",
     icon: <FaWallet />,
     color: "bg-orange-100 text-orange-500",
+    link: "/ventes"
   },
 
   {
@@ -24,6 +24,7 @@ const stats = [
     growth: "+12.5%",
     icon: <FaShoppingCart />,
     color: "bg-purple-100 text-purple-500",
+    link: "/commandes"
   },
 
   {
@@ -32,6 +33,7 @@ const stats = [
     growth: "+8.3%",
     icon: <FaUsers />,
     color: "bg-green-100 text-green-500",
+    link: "/utilisateurs"
   },
 
   {
@@ -40,6 +42,7 @@ const stats = [
     growth: "+5.7%",
     icon: <FaChartPie />,
     color: "bg-blue-100 text-blue-500",
+    link: "/panier-moyen"
   },
 ];
 
@@ -86,6 +89,7 @@ export default function StatsCards() {
           growth={item.growth}
           icon={item.icon}
           color={item.color}
+          link={item.link}
         />
       ))}
 
