@@ -14,18 +14,28 @@ import Users from "../pages/users/Users";
 import Analytics from "../pages/analytics/Analytics";
 import Products from "../pages/products/Products";
 import Reports from "../pages/reports/Reports";
+import AdminLogin from "../pages/Admin/AdminLogin";
 export default function AppRouter() {
+
   return (
+
     <BrowserRouter>
 
       <Routes>
 
+        {/* PAGE LOGIN ADMIN */}
+        <Route
+          path="/admin/login"
+          element={<AdminLogin />}
+        />
+
         {/* REDIRECTION PAGE PRINCIPALE */}
         <Route
           path="/"
-          element={<Navigate to="/admin" replace />}
+          element={<Navigate to="/admin/login" replace />}
         />
 
+        {/* DASHBOARD */}
         <Route
           path="/admin"
           element={
@@ -35,7 +45,7 @@ export default function AppRouter() {
           }
         />
 
-
+        {/* COMMANDES */}
         <Route
           path="/commandes"
           element={
@@ -45,6 +55,7 @@ export default function AppRouter() {
           }
         />
 
+        {/* CATEGORIES */}
         <Route
           path="/categories"
           element={
@@ -54,6 +65,7 @@ export default function AppRouter() {
           }
         />
 
+        {/* VENTES */}
         <Route
           path="/ventes"
           element={
@@ -63,6 +75,7 @@ export default function AppRouter() {
           }
         />
 
+        {/* ACHATS */}
         <Route
           path="/achats"
           element={
@@ -72,6 +85,7 @@ export default function AppRouter() {
           }
         />
 
+        {/* PARAMETRES */}
         <Route
           path="/parametres"
           element={
@@ -124,11 +138,13 @@ export default function AppRouter() {
         {/* FALLBACK */}
         <Route
           path="*"
-          element={<Navigate to="/admin" replace />}
+          element={<Navigate to="/admin/login" replace />}
         />
 
       </Routes>
 
     </BrowserRouter>
+
   );
+
 }
