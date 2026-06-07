@@ -12,6 +12,8 @@ import Notifications from "../pages/notifications/Notifications";
 import Profile from "../pages/profile/Profile";
 import Users from "../pages/users/Users";
 import Analytics from "../pages/analytics/Analytics";
+import Products from "../pages/products/Products";
+import Reports from "../pages/reports/Reports";
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -78,13 +80,46 @@ export default function AppRouter() {
             </Layout>
           }
         />
-        <Route path="/notifications" element={<Notifications />} />
 
-        <Route path="/profil" element={<Profile />} />
+        <Route
+          path="/profile"
+          element={
+            <Layout>
+              <Profile />
+            </Layout>
+          }
+        />
 
-        <Route path="/utilisateurs" element={<Users />} />
+        <Route path="/utilisateurs" element={<Layout><Users /></Layout>} />
 
-        <Route path="/analytics" element={<Analytics />} />
+        <Route
+          path="/analytics"
+          element={
+            <Layout>
+              <Analytics />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/produits"
+          element={
+            <Layout>
+              <Products />
+            </Layout>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <Layout>
+              <Notifications />
+            </Layout>
+          }
+        />
+
+        <Route path="/reports" element={<Layout><Reports /></Layout>} />
+
 
         {/* FALLBACK */}
         <Route

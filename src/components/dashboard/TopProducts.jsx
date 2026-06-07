@@ -28,9 +28,9 @@ export default function TopProducts() {
           Top produits
         </h2>
 
-        <button className="text-orange-500 font-medium">
+       <Link to="/produits" className="text-orange-500 font-medium">
           Voir tout
-        </button>
+        </Link>
       </div>
 
       <div className="space-y-5">
