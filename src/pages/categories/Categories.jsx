@@ -1,195 +1,334 @@
-import { useState } from "react";
-import { FaPlus, FaTimes } from "react-icons/fa";
-export default function Categories() {
-const [showModal, setShowModal] = useState(false);
+import { useEffect, useState } from "react";
 
-const [newCategory, setNewCategory] = useState({
-  nom: "",
-  description: "",
-  image: "",
-});
+import {
+  getCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  getSubCategories,
+  createSubCategory,
+  deleteSubCategory,
+} from "../../services/categories.service";
+
+export default function Categories() {
+  const [categories, setCategories] = useState([]);
+
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const [subCategories, setSubCategories] = useState([]);
+
+  const [showModal, setShowModal] = useState(false);
+
+  const [categoryName, setCategoryName] = useState("");
+
+  const [subCategoryName, setSubCategoryName] = useState("");
+
+  const [editingCategory, setEditingCategory] = useState(null);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const loadCategories = async () => {
+    try {
+      const data = await getCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const openCategory = async (category) => {
+    try {
+      const data = await getSubCategories(category.code);
+
+      setSelectedCategory(category);
+
+      setSubCategories(data);
+
+      setShowModal(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSaveCategory = async () => {
+    try {
+      if (editingCategory) {
+        await updateCategory(editingCategory.code, {
+          nom: categoryName,
+        });
+      } else {
+        await createCategory({
+          nom: categoryName,
+        });
+      }
+
+      setCategoryName("");
+
+      setEditingCategory(null);
+
+      loadCategories();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDeleteCategory = async (code) => {
+    if (!window.confirm("Supprimer cette catégorie ?")) return;
+
+    try {
+      await deleteCategory(code);
+
+      loadCategories();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleAddSubCategory = async () => {
+    try {
+      await createSubCategory({
+        nom: subCategoryName,
+        categorie: selectedCategory.code,
+      });
+
+      const data = await getSubCategories(
+        selectedCategory.code
+      );
+
+      setSubCategories(data);
+
+      setSubCategoryName("");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDeleteSubCategory = async (code) => {
+    if (
+      !window.confirm(
+        "Supprimer cette sous-catégorie ?"
+      )
+    )
+      return;
+
+    try {
+      await deleteSubCategory(code);
+
+      const data = await getSubCategories(
+        selectedCategory.code
+      );
+
+      setSubCategories(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div>
 
-      <div className="flex justify-between items-center mb-6">
+      <div className="bg-white p-6 rounded-2xl shadow-sm mb-6">
 
-        <div>
-          <h1 className="text-3xl font-bold">
-            Catégories
-          </h1>
+        <h1 className="text-2xl font-bold mb-6">
+          Gestion des catégories
+        </h1>
 
-          <p className="text-gray-500 mt-1">
-            Organisez les produits et articles par catégories
-          </p>
-        </div>
+        <div className="flex gap-4 mb-6">
 
-        <button
-  onClick={() => setShowModal(true)}
-  className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-5 py-3 rounded-2xl transition font-medium"
->
-
-  <FaPlus />
-
-  Ajouter une catégorie
-
-</button>
-
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          Électronique
-        </div>
-
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          Mode
-        </div>
-
-        <div className="bg-white rounded-2xl p-6 shadow-sm">
-          Maison
-        </div>
-
-      </div>
-{
-  showModal && (
-
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-
-      <div className="bg-white rounded-3xl w-full max-w-2xl p-7 animate-in fade-in zoom-in duration-200">
-
-        {/* HEADER */}
-        <div className="flex items-center justify-between mb-6">
-
-          <div>
-
-            <h2 className="text-2xl font-bold">
-              Ajouter une catégorie
-            </h2>
-
-            <p className="text-gray-500 mt-1">
-              Créez une nouvelle catégorie 
-            </p>
-
-          </div>
+          <input
+            type="text"
+            placeholder="Nom catégorie"
+            value={categoryName}
+            onChange={(e) =>
+              setCategoryName(e.target.value)
+            }
+            className="border rounded-xl px-4 py-2 flex-1"
+          />
 
           <button
-            onClick={() => setShowModal(false)}
-            className="bg-gray-100 hover:bg-gray-200 p-3 rounded-xl transition"
+            onClick={handleSaveCategory}
+            className="bg-orange-500 text-white px-5 py-2 rounded-xl"
           >
-
-            <FaTimes />
-
+            {editingCategory
+              ? "Modifier"
+              : "Ajouter"}
           </button>
 
         </div>
 
-        {/* FORM */}
-        <div className="space-y-5">
+        <div className="overflow-x-auto">
 
-          {/* NOM */}
-          <div>
+          <table className="w-full">
 
-            <label className="text-sm font-medium text-gray-700">
+            <thead>
 
-              Nom catégorie
+              <tr className="border-b">
+                <th className="text-left p-3">
+                  Code
+                </th>
 
-            </label>
+                <th className="text-left p-3">
+                  Nom
+                </th>
 
-            <input
-              type="text"
-              value={newCategory.nom}
-              onChange={(e) =>
-                setNewCategory({
-                  ...newCategory,
-                  nom: e.target.value,
-                })
-              }
-              placeholder="Ex: Électronique"
-              className="w-full border border-gray-200 rounded-2xl p-4 mt-2 outline-none focus:ring-2 focus:ring-orange-500"
-            />
+                <th className="text-left p-3">
+                  Actions
+                </th>
+              </tr>
 
-          </div>
+            </thead>
 
-          {/* DESCRIPTION */}
-          <div>
+            <tbody>
 
-            <label className="text-sm font-medium text-gray-700">
+              {categories.map((category) => (
 
-              Description
+                <tr
+                  key={category.code}
+                  className="border-b hover:bg-gray-50"
+                >
 
-            </label>
+                  <td className="p-3">
+                    {category.code}
+                  </td>
 
-            <textarea
-              rows={4}
-              value={newCategory.description}
-              onChange={(e) =>
-                setNewCategory({
-                  ...newCategory,
-                  description: e.target.value,
-                })
-              }
-              placeholder="Description de la catégorie..."
-              className="w-full border border-gray-200 rounded-2xl p-4 mt-2 outline-none focus:ring-2 focus:ring-orange-500 resize-none"
-            />
+                  <td className="p-3">
+                    {category.nom}
+                  </td>
 
-          </div>
+                  <td className="p-3 flex gap-2">
 
-          {/* IMAGE */}
-          <div>
+                    <button
+                      onClick={() =>
+                        openCategory(category)
+                      }
+                      className="bg-blue-500 text-white px-3 py-1 rounded-lg"
+                    >
+                      Voir
+                    </button>
 
-            <label className="text-sm font-medium text-gray-700">
+                    <button
+                      onClick={() => {
+                        setEditingCategory(
+                          category
+                        );
+                        setCategoryName(
+                          category.nom
+                        );
+                      }}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded-lg"
+                    >
+                      Modifier
+                    </button>
 
-              Image catégorie
+                    <button
+                      onClick={() =>
+                        handleDeleteCategory(
+                          category.code
+                        )
+                      }
+                      className="bg-red-500 text-white px-3 py-1 rounded-lg"
+                    >
+                      Supprimer
+                    </button>
 
-            </label>
+                  </td>
 
-            <input
-              type="file"
-              className="w-full border border-dashed border-gray-300 rounded-2xl p-4 mt-2"
-            />
+                </tr>
 
-          </div>
+              ))}
 
-        </div>
+            </tbody>
 
-        {/* FOOTER */}
-        <div className="flex justify-end gap-4 mt-8">
-
-          <button
-            onClick={() => setShowModal(false)}
-            className="px-5 py-3 rounded-2xl border border-gray-300 hover:bg-gray-100 transition"
-          >
-            Annuler
-          </button>
-
-          <button
-            onClick={() => {
-
-              console.log(newCategory);
-
-              setShowModal(false);
-
-              setNewCategory({
-                nom: "",
-                description: "",
-                image: "",
-              });
-            }}
-            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-2xl transition font-medium"
-          >
-            Ajouter
-          </button>
+          </table>
 
         </div>
 
       </div>
+
+      {showModal && (
+
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+
+          <div className="bg-white w-[700px] rounded-2xl p-6">
+
+            <div className="flex justify-between mb-6">
+
+              <h2 className="text-xl font-bold">
+                Sous-catégories de{" "}
+                {selectedCategory?.nom}
+              </h2>
+
+              <button
+                onClick={() =>
+                  setShowModal(false)
+                }
+              >
+                ✕
+              </button>
+
+            </div>
+
+            <div className="flex gap-3 mb-5">
+
+              <input
+                type="text"
+                placeholder="Nouvelle sous-catégorie"
+                value={subCategoryName}
+                onChange={(e) =>
+                  setSubCategoryName(
+                    e.target.value
+                  )
+                }
+                className="border rounded-xl px-4 py-2 flex-1"
+              />
+
+              <button
+                onClick={handleAddSubCategory}
+                className="bg-orange-500 text-white px-4 rounded-xl"
+              >
+                Ajouter
+              </button>
+
+            </div>
+
+            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+
+              {subCategories.map((sub) => (
+
+                <div
+                  key={sub.code}
+                  className="border rounded-xl p-3 flex justify-between items-center"
+                >
+
+                  <span>
+                    {sub.nom}
+                  </span>
+
+                  <button
+                    onClick={() =>
+                      handleDeleteSubCategory(
+                        sub.code
+                      )
+                    }
+                    className="text-red-500"
+                  >
+                    Supprimer
+                  </button>
+
+                </div>
+
+              ))}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
 
     </div>
-
-  )
-}
-    </div>
-    
   );
 }
