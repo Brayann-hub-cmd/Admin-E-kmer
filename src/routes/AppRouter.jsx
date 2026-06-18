@@ -123,14 +123,7 @@ export default function AppRouter() {
             </Layout>
           }
         />
-        <Route
-          path="/notifications"
-          element={
-            <Layout>
-              <Notifications />
-            </Layout>
-          }
-        />
+      
 
         <Route path="/reports" element={<Layout><Reports /></Layout>} />
 

@@ -1,5 +1,10 @@
 import api from "./api";
 
-export const purchasesService = {
-  getAll: () => api.get("achats/"),
+const purchasesService = {
+  getAll: async () => {
+    const { data } = await api.get("/achats/");
+    return data;
+  },
 };
+
+export default purchasesService;

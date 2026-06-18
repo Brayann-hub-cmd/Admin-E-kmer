@@ -1,43 +1,53 @@
 import api from "./api";
 
-export const getCategories = async () => {
-  const response = await api.get("/categories/");
-  return response.data;
+const categoriesService = {
+  getCategories: async () => {
+    const { data } = await api.get("/categories/");
+    return data;
+  },
+
+  createCategory: async (payload) => {
+    const { data } = await api.post("/categories/", payload);
+    return data;
+  },
+
+  updateCategory: async (code, payload) => {
+    const { data } = await api.put(`/categories/${code}/`, payload);
+    return data;
+  },
+
+  deleteCategory: async (code) => {
+    const { data } = await api.delete(`/categories/${code}/`);
+    return data;
+  },
+
+  getSubCategories: async () => {
+    const { data } = await api.get("/sous_categories/");
+    return data;
+  },
+
+  createSubCategory: async (payload) => {
+    const { data } = await api.post("/sous_categories/", payload);
+    return data;
+  },
+
+  updateSubCategory: async (code, payload) => {
+    const { data } = await api.put(`/sous_categories/${code}/`, payload);
+    return data;
+  },
+
+  deleteSubCategory: async (code) => {
+    const { data } = await api.delete(`/sous_categories/${code}/`);
+    return data;
+  },
+
+  getSubCategoriesByCategory: async (categorieCode) => {
+    const { data } = await api.get(
+      `/categories/${categorieCode}/sous_categories`
+    );
+
+    return data;
+  },
 };
 
-export const createCategory = async (data) => {
-  const response = await api.post("/categories/", data);
-  return response.data;
-};
-
-export const updateCategory = async (code, data) => {
-  const response = await api.put(`/categories/${code}/`, data);
-  return response.data;
-};
-
-export const deleteCategory = async (code) => {
-  const response = await api.delete(`/categories/${code}/`);
-  return response.data;
-};
-
-export const getSubCategories = async (categoryCode) => {
-  const response = await api.get(
-    `/low_categories/${categoryCode}/sous_categories/`
-  );
-  return response.data;
-};
-
-export const createSubCategory = async (data) => {
-  const response = await api.post("/sous_categories/", data);
-  return response.data;
-};
-
-export const updateSubCategory = async (code, data) => {
-  const response = await api.put(`/sous_categories/${code}/`, data);
-  return response.data;
-};
-
-export const deleteSubCategory = async (code) => {
-  const response = await api.delete(`/sous_categories/${code}/`);
-  return response.data;
-};
+export default categoriesService;

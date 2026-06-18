@@ -1,8 +1,23 @@
 import api from "./api";
 
-export const ordersService = {
-  getAll: () => api.get("commandes/"),
+const ordersService = {
+  getAll: async () => {
+    const { data } = await api.get("/orders/");
+    return data;
+  },
 
-  confirm: (id) =>
-    api.post(`commandes/${id}/confirmer/`),
+  create: async () => {
+    const { data } = await api.post("/orders/");
+    return data;
+  },
+
+  confirm: async (orderId) => {
+    const { data } = await api.post(
+      `/orders/${orderId}/confirm/`
+    );
+
+    return data;
+  },
 };
+
+export default ordersService;
