@@ -1,23 +1,25 @@
 import api from "./api";
 
-const ordersService = {
-  getAll: async () => {
-    const { data } = await api.get("/orders/");
-    return data;
-  },
-
-  create: async () => {
-    const { data } = await api.post("/orders/");
-    return data;
-  },
-
-  confirm: async (orderId) => {
-    const { data } = await api.post(
-      `/orders/${orderId}/confirm/`
-    );
-
-    return data;
-  },
+export const getOrders = async () => {
+  const response = await api.get("commandes/");
+  return Array.isArray(response.data) ? response.data : [];
 };
 
-export default ordersService;
+export const confirmOrder = async (id) => {
+  const response = await api.post(
+    `commandes/${id}/confirmer/`
+  );
+
+  return response.data;
+};
+
+export const getOrderStats = async () => {
+  const orders = await getOrders();
+  const total = orders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+
+  return {
+    total,
+    count: orders.length,
+    average: orders.length ? Math.round(total / orders.length) : 0,
+  };
+};

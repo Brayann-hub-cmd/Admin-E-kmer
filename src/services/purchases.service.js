@@ -1,10 +1,6 @@
 import api from "./api";
 
-const purchasesService = {
-  getAll: async () => {
-    const { data } = await api.get("/achats/");
-    return data;
-  },
+export const getPurchases = async () => {
+  const response = await api.get("achats/");
+  return Array.isArray(response.data) ? response.data : [];
 };
-
-export default purchasesService;

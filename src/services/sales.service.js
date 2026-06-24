@@ -1,15 +1,16 @@
 import api from "./api";
 
-const salesService = {
-  getAll: async () => {
-    const { data } = await api.get("/ventes-vendeur/");
-    return data;
-  },
-
-  getDetails: async (code) => {
-    const { data } = await api.get(`/ventes/${code}/`);
-    return data;
-  },
+export const getSales = async () => {
+  const response = await api.get("ventes/");
+  return Array.isArray(response.data) ? response.data : [];
 };
 
-export default salesService;
+export const getVendorSales = async () => {
+  const response = await api.get("ventes/vendeur/");
+  return Array.isArray(response.data) ? response.data : [];
+};
+
+export const getSaleDetails = async (code) => {
+  const response = await api.get(`ventes/${code}/`);
+  return response.data;
+};

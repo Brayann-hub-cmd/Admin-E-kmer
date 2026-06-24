@@ -1,37 +1,26 @@
 import api from "./api";
 
-const usersService = {
-  getAll: async () => {
-    const { data } = await api.get("/users/");
-    return data;
-  },
-
-  getById: async (id) => {
-    const { data } = await api.get(`/users/${id}/`);
-    return data;
-  },
-
-  create: async (payload) => {
-    const { data } = await api.post("/users/", payload);
-    return data;
-  },
-
-  update: async (id, payload) => {
-    const { data } = await api.put(`/users/${id}/`, payload);
-    return data;
-  },
-
-  delete: async (id) => {
-    const { data } = await api.delete(`/users/${id}/`);
-    return data;
-  },
-
-  getProfile: async () => {
-    const { data } = await api.get("/profile/");
-    return data;
-  },
+export const getUsers = async () => {
+  const response = await api.get("users/");
+  return Array.isArray(response.data) ? response.data : [];
 };
 
-export default usersService;
+export const createUser = async (data) => {
+  const response = await api.post("users/", data);
+  return response.data;
+};
 
+export const updateUser = async (id, data) => {
+  const response = await api.put(
+    `users/${id}/`,
+    data
+  );
+  return response.data;
+};
 
+export const deleteUser = async (id) => {
+  const response = await api.delete(
+    `users/${id}/`
+  );
+  return response.data;
+};

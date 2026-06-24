@@ -1,311 +1,271 @@
 import { useEffect, useState } from "react";
-import usersService from "../../services/users.service";
-import productsService from "../../services/products.service";
-import categoriesService from "../../services/categories.service";
-
+import { Link } from "react-router-dom";
 import {
+  FaChartPie,
+  FaShoppingCart,
+  FaStore,
   FaUsers,
-  FaBoxOpen,
-  FaTags,
-  FaLayerGroup,
+  FaUserPlus,
+  FaWallet,
 } from "react-icons/fa";
+import {
+  Area,
+  AreaChart,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { getDashboardStats } from "../../services/dashboard.service";
+
+const statusClass = {
+  Livrée: "bg-green-100 text-green-600",
+  "En livraison": "bg-blue-100 text-blue-600",
+  "En attente": "bg-orange-100 text-orange-600",
+};
+
+const activityIcon = {
+  commande: {
+    icon: <FaShoppingCart />,
+    className: "bg-orange-100 text-orange-500",
+  },
+  boutique: {
+    icon: <FaStore />,
+    className: "bg-purple-100 text-purple-500",
+  },
+  utilisateur: {
+    icon: <FaUserPlus />,
+    className: "bg-green-100 text-green-500",
+  },
+};
+
+const formatCurrency = (value) => `${Number(value || 0).toLocaleString("fr-FR")} FCFA`;
+
+function DashboardCard({ icon, iconClass, value, label }) {
+  return (
+    <div className="bg-white rounded-2xl p-5 min-h-[180px] shadow-sm relative">
+      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl ${iconClass}`}>
+        {icon}
+      </div>
+      <h2 className="text-2xl font-semibold mt-7 text-gray-950">{value}</h2>
+      <p className="text-gray-400 mt-3">{label}</p>
+    </div>
+  );
+}
 
 export default function Dashboard() {
-  const [loading, setLoading] = useState(true);
-
-  const [users, setUsers] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [subCategories, setSubCategories] = useState([]);
+  const [dashboard, setDashboard] = useState(null);
 
   useEffect(() => {
-    loadDashboard();
+    getDashboardStats()
+      .then(setDashboard)
+      .catch((error) => {
+        console.error(error);
+      });
   }, []);
 
-  const loadDashboard = async () => {
-    try {
-      const [
-        usersData,
-        productsData,
-        categoriesData,
-        subCategoriesData,
-      ] = await Promise.all([
-        usersService.getAll(),
-        productsService.getAll(),
-        categoriesService.getCategories(),
-        categoriesService.getSubCategories(),
-      ]);
+  if (!dashboard) {
+    return <div className="flex justify-center items-center h-[60vh] text-gray-500">Chargement...</div>;
+  }
 
-      setUsers(usersData || []);
-      setProducts(productsData || []);
-      setCategories(categoriesData || []);
-      setSubCategories(subCategoriesData || []);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const stats = [
+  const cards = [
     {
-      title: "Utilisateurs",
-      value: users.length,
-      icon: <FaUsers size={28} />,
+      label: "Volume des ventes",
+      value: formatCurrency(dashboard.volumeVentes),
+      icon: <FaWallet />,
+      iconClass: "bg-orange-100 text-orange-500",
     },
     {
-      title: "Produits",
-      value: products.length,
-      icon: <FaBoxOpen size={28} />,
+      label: "Commandes",
+      value: Number(dashboard.nbCommandes).toLocaleString("fr-FR"),
+      icon: <FaShoppingCart />,
+      iconClass: "bg-purple-100 text-purple-500",
     },
     {
-      title: "Catégories",
-      value: categories.length,
-      icon: <FaTags size={28} />,
+      label: "Utilisateurs actifs",
+      value: Number(dashboard.utilisateursActifs).toLocaleString("fr-FR"),
+      icon: <FaUsers />,
+      iconClass: "bg-green-100 text-green-500",
     },
     {
-      title: "Sous-catégories",
-      value: subCategories.length,
-      icon: <FaLayerGroup size={28} />,
+      label: "Panier moyen",
+      value: formatCurrency(dashboard.panierMoyen),
+      icon: <FaChartPie />,
+      iconClass: "bg-blue-100 text-blue-500",
     },
   ];
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-[70vh]">
-        <p className="text-lg font-medium">
-          Chargement...
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-8">
-
-      {/* HEADER */}
-
-      <div>
-        <h1 className="text-3xl font-bold">
-          Dashboard
-        </h1>
-
-        <p className="text-gray-500 mt-1">
-          Vue globale de la plateforme E-Kmer
-        </p>
-      </div>
-
-      {/* STATS */}
-
+    <div className="space-y-7">
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="
-              bg-white
-              rounded-2xl
-              shadow-sm
-              p-6
-              flex
-              justify-between
-              items-center
-            "
-          >
-            <div>
-              <p className="text-gray-500 text-sm">
-                {stat.title}
-              </p>
-
-              <h2 className="text-3xl font-bold mt-2">
-                {stat.value}
-              </h2>
-            </div>
-
-            <div className="text-orange-500">
-              {stat.icon}
-            </div>
-          </div>
+        {cards.map((card) => (
+          <DashboardCard key={card.label} {...card} />
         ))}
       </div>
 
-      {/* TABLEAU PRODUITS */}
+      <div className="grid grid-cols-1 xl:grid-cols-[2fr_0.95fr] gap-7">
+        <section className="bg-white rounded-3xl p-7 shadow-sm min-h-[548px]">
+          <div className="flex items-start justify-between mb-8">
+            <div>
+              <h2 className="font-semibold text-xl text-gray-950">Activité de la marketplace</h2>
+              <p className="text-gray-500 mt-2">Suivi global des transactions et échanges</p>
+            </div>
+            <select className="border border-gray-200 rounded-xl px-5 py-3 outline-none bg-white">
+              <option>7 derniers jours</option>
+              <option>30 derniers jours</option>
+            </select>
+          </div>
 
-      <div className="bg-white rounded-2xl shadow-sm p-6">
+          <ResponsiveContainer width="100%" height={385}>
+            <AreaChart data={dashboard.activityData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f97316" stopOpacity={0.25} />
+                  <stop offset="100%" stopColor="#f97316" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: "#667085" }} />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "#667085" }}
+                ticks={[0, 3500000, 7000000, 10500000, 14000000]}
+                tickFormatter={(value) => `${value / 1000000 || 0}M`}
+              />
+              <Tooltip formatter={(value) => formatCurrency(value)} />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke="#f97316"
+                fill="url(#salesGradient)"
+                strokeWidth={3}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </section>
 
-        <h2 className="text-xl font-semibold mb-5">
-          Derniers Produits
-        </h2>
+        <section className="bg-white rounded-3xl p-7 shadow-sm min-h-[548px]">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="font-semibold text-xl text-gray-950">Commandes récentes</h2>
+            <Link to="/commandes" className="text-orange-500 font-semibold">
+              Voir tout
+            </Link>
+          </div>
 
-        <div className="overflow-x-auto">
-
-          <table className="w-full">
-
-            <thead>
-
-              <tr className="border-b">
-
-                <th className="text-left py-3">
-                  Produit
-                </th>
-
-                <th className="text-left py-3">
-                  Prix
-                </th>
-
-                <th className="text-left py-3">
-                  Quantité
-                </th>
-
-                <th className="text-left py-3">
-                  Localisation
-                </th>
-
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {products.slice(0, 5).map((product) => (
-                <tr
-                  key={product.code}
-                  className="border-b hover:bg-gray-50"
-                >
-                  <td className="py-4">
-                    <div className="flex items-center gap-3">
-
-                      <img
-                        src={product.image}
-                        alt={product.titre}
-                        className="
-                          w-12
-                          h-12
-                          rounded-lg
-                          object-cover
-                        "
-                      />
-
-                      <div>
-                        <p className="font-medium">
-                          {product.titre}
-                        </p>
-
-                        <p className="text-sm text-gray-500">
-                          {product.code}
-                        </p>
-                      </div>
-
-                    </div>
-                  </td>
-
-                  <td className="py-4">
-                    {Number(product.prix).toLocaleString()} FCFA
-                  </td>
-
-                  <td className="py-4">
-                    {product.qte}
-                  </td>
-
-                  <td className="py-4">
-                    {product.localisation}
-                  </td>
-
-                </tr>
-              ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
+          <div className="space-y-7">
+            {dashboard.commandesRecentes.map((order) => (
+              <div key={order.id} className="flex justify-between gap-5">
+                <div>
+                  <p className="font-semibold">{order.id}</p>
+                  <p className="text-gray-500 mt-1">{order.client}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">{order.total}</p>
+                  <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs ${statusClass[order.statut] || statusClass["En attente"]}`}>
+                    {order.statut}
+                  </span>
+                </div>
+              </div>
+            ))}
+            {!dashboard.commandesRecentes.length && (
+              <p className="text-center text-gray-500 py-10">Aucune commande récente.</p>
+            )}
+          </div>
+        </section>
       </div>
 
-      {/* TABLEAU UTILISATEURS */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-7">
+        <section className="bg-white rounded-3xl p-7 shadow-sm min-h-[472px]">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="font-semibold text-xl text-gray-950">Top produits</h2>
+            <Link to="/produits" className="text-orange-500 font-semibold">
+              Voir tout
+            </Link>
+          </div>
+          <div className="space-y-7">
+            {dashboard.topProduits.map((product) => (
+              <div key={product.code} className="flex justify-between gap-4">
+                <div>
+                  <p className="font-semibold">{product.titre}</p>
+                  <p className="text-gray-500 mt-1">{product.ventes || product.qte || 0} ventes</p>
+                </div>
+                <p className="font-semibold whitespace-nowrap">{formatCurrency(product.total || product.prix)}</p>
+              </div>
+            ))}
+            {!dashboard.topProduits.length && (
+              <p className="text-center text-gray-500 py-10">Aucun produit à afficher.</p>
+            )}
+          </div>
+        </section>
 
-      <div className="bg-white rounded-2xl shadow-sm p-6">
-
-        <h2 className="text-xl font-semibold mb-5">
-          Derniers Utilisateurs
-        </h2>
-
-        <div className="overflow-x-auto">
-
-          <table className="w-full">
-
-            <thead>
-
-              <tr className="border-b">
-
-                <th className="text-left py-3">
-                  Nom
-                </th>
-
-                <th className="text-left py-3">
-                  Email
-                </th>
-
-                <th className="text-left py-3">
-                  Téléphone
-                </th>
-
-                <th className="text-left py-3">
-                  Rôle
-                </th>
-
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {users.slice(0, 5).map((user) => (
-                <tr
-                  key={user.id}
-                  className="border-b hover:bg-gray-50"
-                >
-                  <td className="py-4">
-                    {user.username}
-                  </td>
-
-                  <td className="py-4">
-                    {user.email}
-                  </td>
-
-                  <td className="py-4">
-                    {user.telephone}
-                  </td>
-
-                  <td className="py-4">
-                    <span
-                      className={`
-                        px-3
-                        py-1
-                        rounded-full
-                        text-sm
-                        ${
-                          user.role === "admin"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-blue-100 text-blue-700"
-                        }
-                      `}
-                    >
-                      {user.role}
+        <section className="bg-white rounded-3xl p-7 shadow-sm min-h-[472px]">
+          <h2 className="font-semibold text-xl text-gray-950">Ventes par catégorie</h2>
+          <p className="text-gray-500 mt-2">Répartition des ventes marketplace</p>
+          {dashboard.ventesParCategorie.length ? (
+            <>
+              <div className="relative h-[280px] mt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={dashboard.ventesParCategorie} dataKey="value" innerRadius={72} outerRadius={112} paddingAngle={4}>
+                      {dashboard.ventesParCategorie.map((entry) => (
+                        <Cell key={entry.name} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-3xl font-semibold text-gray-900">100%</span>
+                  <span className="text-gray-500">Total ventes</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-5 mt-2">
+                {dashboard.ventesParCategorie.map((category) => (
+                  <div key={category.name} className="flex justify-between gap-3 text-gray-700">
+                    <span className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full" style={{ backgroundColor: category.color }} />
+                      {category.name}
                     </span>
-                  </td>
+                    <strong>{category.value}%</strong>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="h-[350px] flex items-center justify-center text-gray-500">
+              Aucune donnée catégorie.
+            </div>
+          )}
+        </section>
 
-                </tr>
-              ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
+        <section className="bg-white rounded-3xl p-7 shadow-sm min-h-[472px]">
+          <h2 className="font-semibold text-xl text-gray-950">Activités récentes</h2>
+          <p className="text-gray-500 mt-2 mb-8">Dernières actions marketplace</p>
+          <div className="space-y-7 max-h-[330px] overflow-y-auto pr-3">
+            {dashboard.activitesRecentes.map((activity, index) => {
+              const icon = activityIcon[activity.type] || activityIcon.utilisateur;
+              return (
+                <div key={`${activity.title}-${index}`} className="flex gap-4">
+                  <span className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${icon.className}`}>
+                    {icon.icon}
+                  </span>
+                  <div>
+                    <p className="font-semibold">{activity.title}</p>
+                    <p className="text-gray-500 mt-1">{activity.description}</p>
+                    <p className="text-gray-400 text-sm mt-3">{activity.time}</p>
+                  </div>
+                </div>
+              );
+            })}
+            {!dashboard.activitesRecentes.length && (
+              <p className="text-center text-gray-500 py-10">Aucune activité récente.</p>
+            )}
+          </div>
+        </section>
       </div>
-
     </div>
   );
 }

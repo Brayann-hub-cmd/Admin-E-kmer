@@ -1,86 +1,108 @@
+import { useEffect, useState } from "react";
+
 import {
-  FaWallet,
-  FaShoppingCart,
   FaUsers,
-  FaChartPie,
+  FaShoppingCart,
+  FaTags,
+  FaBoxOpen,
 } from "react-icons/fa";
 
 import StatCard from "../ui/StatCard";
-import { Link } from "react-router-dom";
 
-const stats = [
-  {
-    title: "Volume des ventes",
-    value: "12,580,000 FCFA",
-    growth: "+18.5%",
-    icon: <FaWallet />,
-    color: "bg-orange-100 text-orange-500",
-    link: "/ventes"
-  },
-
-  {
-    title: "Commandes",
-    value: "320",
-    growth: "+12.5%",
-    icon: <FaShoppingCart />,
-    color: "bg-purple-100 text-purple-500",
-    link: "/commandes"
-  },
-
-  {
-    title: "Utilisateurs actifs",
-    value: "2,845",
-    growth: "+8.3%",
-    icon: <FaUsers />,
-    color: "bg-green-100 text-green-500",
-    link: "/utilisateurs"
-  },
-
-  {
-    title: "Panier moyen",
-    value: "48,500 FCFA",
-    growth: "+5.7%",
-    icon: <FaChartPie />,
-    color: "bg-blue-100 text-blue-500",
-    link: "/panier-moyen"
-  },
-];
+import { getUsers } from "../../services/users.service";
+import { getProducts } from "../../services/products.service";
+import {
+  getCategories,
+  getSubCategories,
+} from "../../services/categories.service";
 
 export default function StatsCards() {
-  const [panier,setPanier] = useState([])
-  const getTotalVentes = async () => {
+  const [stats, setStats] = useState([
+    {
+      title: "Utilisateurs",
+      value: 0,
+      growth: "+0%",
+      icon: <FaUsers />,
+      color: "bg-green-100 text-green-500",
+    },
+    {
+      title: "Produits",
+      value: 0,
+      growth: "+0%",
+      icon: <FaBoxOpen />,
+      color: "bg-orange-100 text-orange-500",
+    },
+    {
+      title: "Catégories",
+      value: 0,
+      growth: "+0%",
+      icon: <FaTags />,
+      color: "bg-purple-100 text-purple-500",
+    },
+    {
+      title: "Sous-catégories",
+      value: 0,
+      growth: "+0%",
+      icon: <FaShoppingCart />,
+      color: "bg-blue-100 text-blue-500",
+    },
+  ]);
 
-  }
+  useEffect(() => {
+    loadStats();
+  }, []);
 
-  const getNombreCommandes = async () =>{
-
-  }
-
-  const getUtilisateursActifs = async () =>{
-
-  }
-
-  const getMoyenPanier = async () =>{
+  const loadStats = async () => {
     try {
-      const res = await api.get("panier/")
-      console.log(res.data);
-      
-      setPanier(res.data)
+      const [
+        users,
+        products,
+        categories,
+        subCategories,
+      ] = await Promise.all([
+        getUsers(),
+        getProducts(),
+        getCategories(),
+        getSubCategories(),
+      ]);
 
+      setStats([
+        {
+          title: "Utilisateurs",
+          value: users?.length || 0,
+          growth: "+0%",
+          icon: <FaUsers />,
+          color: "bg-green-100 text-green-500",
+        },
+        {
+          title: "Produits",
+          value: products?.length || 0,
+          growth: "+0%",
+          icon: <FaBoxOpen />,
+          color: "bg-orange-100 text-orange-500",
+        },
+        {
+          title: "Catégories",
+          value: categories?.length || 0,
+          growth: "+0%",
+          icon: <FaTags />,
+          color: "bg-purple-100 text-purple-500",
+        },
+        {
+          title: "Sous-catégories",
+          value: subCategories?.length || 0,
+          growth: "+0%",
+          icon: <FaShoppingCart />,
+          color: "bg-blue-100 text-blue-500",
+        },
+      ]);
     } catch (error) {
-      console.log(error);
-      
+      console.error("Erreur chargement statistiques :", error);
     }
-  }
+  };
 
-  useEffect(
-    ()=>{
-      getMoyenPanier()
-    },[]
-  )
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-6">
-
       {stats.map((item, index) => (
         <StatCard
           key={index}
@@ -89,10 +111,8 @@ export default function StatsCards() {
           growth={item.growth}
           icon={item.icon}
           color={item.color}
-          link={item.link}
         />
       ))}
-
     </div>
   );
 }

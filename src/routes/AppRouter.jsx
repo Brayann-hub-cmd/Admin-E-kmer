@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Layout from "../components/layout/Layout";
+import ProtectedRoute from "./ProtectedRoute";
 
 import Dashboard from "../pages/dashboard/Dashboard";
 import Orders from "../pages/orders/Orders";
@@ -15,12 +16,10 @@ import Analytics from "../pages/analytics/Analytics";
 import Products from "../pages/products/Products";
 import Reports from "../pages/reports/Reports";
 import AdminLogin from "../pages/Admin/AdminLogin";
+
 export default function AppRouter() {
-
   return (
-
     <BrowserRouter>
-
       <Routes>
 
         {/* PAGE LOGIN ADMIN */}
@@ -39,9 +38,9 @@ export default function AppRouter() {
         <Route
           path="/admin"
           element={
-            <Layout>
-              <Dashboard />
-            </Layout>
+            <ProtectedRoute>
+              <Layout><Dashboard /></Layout>
+            </ProtectedRoute>
           }
         />
 
@@ -49,9 +48,9 @@ export default function AppRouter() {
         <Route
           path="/commandes"
           element={
-            <Layout>
-              <Orders />
-            </Layout>
+            <ProtectedRoute>
+              <Layout><Orders /></Layout>
+            </ProtectedRoute>
           }
         />
 
@@ -59,9 +58,9 @@ export default function AppRouter() {
         <Route
           path="/categories"
           element={
-            <Layout>
-              <Categories />
-            </Layout>
+            <ProtectedRoute>
+              <Layout><Categories /></Layout>
+            </ProtectedRoute>
           }
         />
 
@@ -69,9 +68,9 @@ export default function AppRouter() {
         <Route
           path="/ventes"
           element={
-            <Layout>
-              <Sales />
-            </Layout>
+            <ProtectedRoute>
+              <Layout><Sales /></Layout>
+            </ProtectedRoute>
           }
         />
 
@@ -79,9 +78,9 @@ export default function AppRouter() {
         <Route
           path="/achats"
           element={
-            <Layout>
-              <Purchases />
-            </Layout>
+            <ProtectedRoute>
+              <Layout><Purchases /></Layout>
+            </ProtectedRoute>
           }
         />
 
@@ -89,44 +88,66 @@ export default function AppRouter() {
         <Route
           path="/parametres"
           element={
-            <Layout>
-              <Settings />
-            </Layout>
+            <ProtectedRoute>
+              <Layout><Settings /></Layout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/profile"
           element={
-            <Layout>
-              <Profile />
-            </Layout>
+            <ProtectedRoute>
+              <Layout><Profile /></Layout>
+            </ProtectedRoute>
           }
         />
 
-        <Route path="/utilisateurs" element={<Layout><Users /></Layout>} />
+        <Route
+          path="/utilisateurs"
+          element={
+            <ProtectedRoute>
+              <Layout><Users /></Layout>
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/analytics"
           element={
-            <Layout>
-              <Analytics />
-            </Layout>
+            <ProtectedRoute>
+              <Layout><Analytics /></Layout>
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/produits"
           element={
-            <Layout>
-              <Products />
-            </Layout>
+            <ProtectedRoute>
+              <Layout><Products /></Layout>
+            </ProtectedRoute>
           }
         />
-      
 
-        <Route path="/reports" element={<Layout><Reports /></Layout>} />
+        <Route
+          path="/reports"
+          element={
+            <ProtectedRoute>
+              <Layout><Reports /></Layout>
+            </ProtectedRoute>
+          }
+        />
 
+        {/* NOTIFICATIONS */}
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <Layout><Notifications /></Layout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* FALLBACK */}
         <Route
@@ -135,9 +156,6 @@ export default function AppRouter() {
         />
 
       </Routes>
-
     </BrowserRouter>
-
   );
-
 }

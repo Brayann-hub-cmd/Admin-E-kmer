@@ -1,126 +1,66 @@
 import { useEffect, useState } from "react";
-
+import { FaFolderOpen, FaPlus, FaTimes } from "react-icons/fa";
 import {
-  getCategories,
   createCategory,
-  updateCategory,
-  deleteCategory,
-  getSubCategories,
-  createSubCategory,
-  deleteSubCategory,
+  getCategories,
+  getSubCategoriesByCategory,
 } from "../../services/categories.service";
 
 export default function Categories() {
   const [categories, setCategories] = useState([]);
-
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showSubCategoriesModal, setShowSubCategoriesModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
-
   const [subCategories, setSubCategories] = useState([]);
-
-  const [showModal, setShowModal] = useState(false);
-
-  const [categoryName, setCategoryName] = useState("");
-
-  const [subCategoryName, setSubCategoryName] = useState("");
-
-  const [editingCategory, setEditingCategory] = useState(null);
+  const [loadingSubCategories, setLoadingSubCategories] = useState(false);
+  const [formData, setFormData] = useState({
+    nom: "",
+    description: "",
+    image: null,
+  });
 
   useEffect(() => {
     loadCategories();
   }, []);
 
+  // Charge la liste principale depuis l'endpoint GET /api/categories/.
   const loadCategories = async () => {
     try {
       const data = await getCategories();
       setCategories(data);
     } catch (error) {
       console.error(error);
+      setCategories([]);
     }
   };
 
-  const openCategory = async (category) => {
+  // Ouvre une catégorie et récupère ses sous-catégories côté backend.
+  const openSubCategories = async (category) => {
+    setSelectedCategory(category);
+    setShowSubCategoriesModal(true);
+    setLoadingSubCategories(true);
+
     try {
-      const data = await getSubCategories(category.code);
-
-      setSelectedCategory(category);
-
+      const data = await getSubCategoriesByCategory(category.code);
       setSubCategories(data);
-
-      setShowModal(true);
     } catch (error) {
       console.error(error);
+      setSubCategories([]);
+    } finally {
+      setLoadingSubCategories(false);
     }
   };
 
-  const handleSaveCategory = async () => {
+  // Crée une catégorie simple. Le backend ne gère pas encore description/image ici.
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!formData.nom.trim()) return;
+
     try {
-      if (editingCategory) {
-        await updateCategory(editingCategory.code, {
-          nom: categoryName,
-        });
-      } else {
-        await createCategory({
-          nom: categoryName,
-        });
-      }
-
-      setCategoryName("");
-
-      setEditingCategory(null);
-
+      await createCategory({ nom: formData.nom.trim() });
+      setShowCreateModal(false);
+      setFormData({ nom: "", description: "", image: null });
       loadCategories();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleDeleteCategory = async (code) => {
-    if (!window.confirm("Supprimer cette catégorie ?")) return;
-
-    try {
-      await deleteCategory(code);
-
-      loadCategories();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleAddSubCategory = async () => {
-    try {
-      await createSubCategory({
-        nom: subCategoryName,
-        categorie: selectedCategory.code,
-      });
-
-      const data = await getSubCategories(
-        selectedCategory.code
-      );
-
-      setSubCategories(data);
-
-      setSubCategoryName("");
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleDeleteSubCategory = async (code) => {
-    if (
-      !window.confirm(
-        "Supprimer cette sous-catégorie ?"
-      )
-    )
-      return;
-
-    try {
-      await deleteSubCategory(code);
-
-      const data = await getSubCategories(
-        selectedCategory.code
-      );
-
-      setSubCategories(data);
     } catch (error) {
       console.error(error);
     }
@@ -128,207 +68,150 @@ export default function Categories() {
 
   return (
     <div>
-
-      <div className="bg-white p-6 rounded-2xl shadow-sm mb-6">
-
-        <h1 className="text-2xl font-bold mb-6">
-          Gestion des catégories
-        </h1>
-
-        <div className="flex gap-4 mb-6">
-
-          <input
-            type="text"
-            placeholder="Nom catégorie"
-            value={categoryName}
-            onChange={(e) =>
-              setCategoryName(e.target.value)
-            }
-            className="border rounded-xl px-4 py-2 flex-1"
-          />
-
-          <button
-            onClick={handleSaveCategory}
-            className="bg-orange-500 text-white px-5 py-2 rounded-xl"
-          >
-            {editingCategory
-              ? "Modifier"
-              : "Ajouter"}
-          </button>
-
+      <div className="flex justify-between items-start mb-8">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-950">Catégories</h1>
+          <p className="text-gray-500 mt-1">Organisez les produits et articles par catégories</p>
         </div>
 
-        <div className="overflow-x-auto">
-
-          <table className="w-full">
-
-            <thead>
-
-              <tr className="border-b">
-                <th className="text-left p-3">
-                  Code
-                </th>
-
-                <th className="text-left p-3">
-                  Nom
-                </th>
-
-                <th className="text-left p-3">
-                  Actions
-                </th>
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {categories.map((category) => (
-
-                <tr
-                  key={category.code}
-                  className="border-b hover:bg-gray-50"
-                >
-
-                  <td className="p-3">
-                    {category.code}
-                  </td>
-
-                  <td className="p-3">
-                    {category.nom}
-                  </td>
-
-                  <td className="p-3 flex gap-2">
-
-                    <button
-                      onClick={() =>
-                        openCategory(category)
-                      }
-                      className="bg-blue-500 text-white px-3 py-1 rounded-lg"
-                    >
-                      Voir
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setEditingCategory(
-                          category
-                        );
-                        setCategoryName(
-                          category.nom
-                        );
-                      }}
-                      className="bg-yellow-500 text-white px-3 py-1 rounded-lg"
-                    >
-                      Modifier
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        handleDeleteCategory(
-                          category.code
-                        )
-                      }
-                      className="bg-red-500 text-white px-3 py-1 rounded-lg"
-                    >
-                      Supprimer
-                    </button>
-
-                  </td>
-
-                </tr>
-
-              ))}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-3 rounded-xl flex items-center gap-2 font-medium"
+        >
+          <FaPlus />
+          Ajouter une catégorie
+        </button>
       </div>
 
-      {showModal && (
-
-        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-
-          <div className="bg-white w-[700px] rounded-2xl p-6">
-
-            <div className="flex justify-between mb-6">
-
-              <h2 className="text-xl font-bold">
-                Sous-catégories de{" "}
-                {selectedCategory?.nom}
-              </h2>
-
-              <button
-                onClick={() =>
-                  setShowModal(false)
-                }
-              >
-                ✕
-              </button>
-
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
+        {categories.map((category) => (
+          <button
+            type="button"
+            key={category.code || category.nom}
+            onClick={() => openSubCategories(category)}
+            className="bg-white rounded-2xl shadow-sm px-7 py-8 text-left hover:shadow-md hover:-translate-y-0.5 transition"
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-medium text-gray-950">{category.nom}</p>
+                <p className="text-sm text-gray-500 mt-1">Voir les sous-catégories</p>
+              </div>
+              <FaFolderOpen className="text-orange-500 text-xl" />
             </div>
+          </button>
+        ))}
 
-            <div className="flex gap-3 mb-5">
-
-              <input
-                type="text"
-                placeholder="Nouvelle sous-catégorie"
-                value={subCategoryName}
-                onChange={(e) =>
-                  setSubCategoryName(
-                    e.target.value
-                  )
-                }
-                className="border rounded-xl px-4 py-2 flex-1"
-              />
-
-              <button
-                onClick={handleAddSubCategory}
-                className="bg-orange-500 text-white px-4 rounded-xl"
-              >
-                Ajouter
-              </button>
-
-            </div>
-
-            <div className="space-y-2 max-h-[400px] overflow-y-auto">
-
-              {subCategories.map((sub) => (
-
-                <div
-                  key={sub.code}
-                  className="border rounded-xl p-3 flex justify-between items-center"
-                >
-
-                  <span>
-                    {sub.nom}
-                  </span>
-
-                  <button
-                    onClick={() =>
-                      handleDeleteSubCategory(
-                        sub.code
-                      )
-                    }
-                    className="text-red-500"
-                  >
-                    Supprimer
-                  </button>
-
-                </div>
-
-              ))}
-
-            </div>
-
+        {!categories.length && (
+          <div className="bg-white rounded-2xl shadow-sm px-7 py-8 text-gray-500 md:col-span-3">
+            Aucune catégorie trouvée.
           </div>
+        )}
+      </div>
 
+      {showSubCategoriesModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[1px] flex items-center justify-center">
+          <div className="bg-white rounded-[28px] w-[620px] max-w-[92vw] p-8">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-950">
+                  {selectedCategory?.nom}
+                </h2>
+                <p className="text-gray-500 mt-1">Sous-catégories associées</p>
+              </div>
+              <button
+                onClick={() => setShowSubCategoriesModal(false)}
+                className="w-11 h-11 rounded-2xl bg-gray-100 inline-flex items-center justify-center"
+                title="Fermer"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            {loadingSubCategories ? (
+              <p className="py-10 text-center text-gray-500">Chargement des sous-catégories...</p>
+            ) : subCategories.length ? (
+              <div className="divide-y divide-gray-100 border border-gray-100 rounded-2xl overflow-hidden">
+                {subCategories.map((subCategory) => (
+                  <div key={subCategory.code || subCategory.nom} className="px-5 py-4 flex items-center justify-between">
+                    <span className="font-medium text-gray-900">{subCategory.nom}</span>
+                    <span className="text-sm text-gray-400">{subCategory.code}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="border border-dashed border-gray-200 rounded-2xl py-10 text-center text-gray-500">
+                Aucune sous-catégorie trouvée pour cette catégorie.
+              </div>
+            )}
+          </div>
         </div>
-
       )}
 
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[1px] flex items-center justify-center">
+          <div className="bg-white rounded-[28px] w-[756px] max-w-[92vw] p-8">
+            <div className="flex justify-between items-start mb-8">
+              <div>
+                <h2 className="text-xl font-semibold">Ajouter une catégorie</h2>
+                <p className="text-gray-500 mt-1">Créez une nouvelle catégorie</p>
+              </div>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="w-11 h-11 rounded-2xl bg-gray-100 inline-flex items-center justify-center"
+                title="Fermer"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-7">
+              <div>
+                <label className="font-medium text-gray-700">Nom catégorie</label>
+                <input
+                  value={formData.nom}
+                  onChange={(event) => setFormData({ ...formData, nom: event.target.value })}
+                  placeholder="Ex: Électronique"
+                  className="mt-3 w-full border border-gray-200 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-orange-200"
+                />
+              </div>
+
+              <div>
+                <label className="font-medium text-gray-700">Description</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(event) => setFormData({ ...formData, description: event.target.value })}
+                  placeholder="Description de la catégorie..."
+                  className="mt-3 w-full border border-gray-200 rounded-2xl px-5 py-5 outline-none h-36 resize-none focus:ring-2 focus:ring-orange-200"
+                />
+              </div>
+
+              <div>
+                <label className="font-medium text-gray-700">Image catégorie</label>
+                <div className="mt-3 border border-dashed border-gray-300 rounded-2xl p-5">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => setFormData({ ...formData, image: event.target.files?.[0] || null })}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-4 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-7 py-4 border border-gray-300 rounded-2xl"
+                >
+                  Annuler
+                </button>
+                <button type="submit" className="px-8 py-4 bg-orange-500 text-white rounded-2xl font-medium">
+                  Ajouter
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
