@@ -131,7 +131,12 @@ export const getDashboardStats = async () => {
 
   const volumeVentes = sales.reduce((sum, sale) => sum + getSaleTotal(sale), 0);
   const nbCommandes = sales.length;
-  const utilisateursActifs = users.filter((user) => user.is_active !== false).length;
+  // Exclude admins/superadmins from the active users count
+  const isAdmin = (user) => {
+    const role = String(user.role || "").toLowerCase();
+    return role === "admin" || role === "superadmin" || user.is_staff === true || user.is_superuser === true;
+  };
+  const utilisateursActifs = users.filter((user) => user.is_active !== false && !isAdmin(user)).length;
   const panierMoyen = nbCommandes ? Math.round(volumeVentes / nbCommandes) : 0;
 
   return {

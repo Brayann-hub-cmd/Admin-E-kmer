@@ -16,6 +16,7 @@ import Analytics from "../pages/analytics/Analytics";
 import Products from "../pages/products/Products";
 import Reports from "../pages/reports/Reports";
 import AdminLogin from "../pages/Admin/AdminLogin";
+import Livreurs from "../pages/livreurs/Livreurs";
 
 export default function AppRouter() {
   return (
@@ -135,6 +136,16 @@ export default function AppRouter() {
           element={
             <ProtectedRoute>
               <Layout><Reports /></Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* LIVREURS */}
+        <Route
+          path="/livreurs"
+          element={
+            <ProtectedRoute>
+              <Layout><Livreurs /></Layout>
             </ProtectedRoute>
           }
         />

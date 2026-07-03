@@ -68,8 +68,10 @@ export default function StatsCards() {
 
       setStats([
         {
+          // Compte des utilisateurs en excluant les administrateurs
+          // On vérifie que le rôle n'est ni 'admin' ni 'Admin'
           title: "Utilisateurs",
-          value: users?.length || 0,
+          value: users ? users.filter(user => user.role !== 'admin' && user.role !== 'Admin').length : 0,
           growth: "+0%",
           icon: <FaUsers />,
           color: "bg-green-100 text-green-500",

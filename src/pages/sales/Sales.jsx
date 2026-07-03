@@ -5,6 +5,7 @@ import { getUsers } from "../../services/users.service";
 const formatCurrency = (value) => `${Number(value || 0).toLocaleString("fr-FR")} FCFA`;
 
 const getStatusStyle = (status) => {
+  // Associe un statut de vente a une couleur de badge.
   const value = String(status || "").toLowerCase();
   if (value.includes("livr") || value.includes("confirm") || value.includes("pay")) {
     return "bg-green-100 text-green-700";
@@ -15,6 +16,7 @@ const getStatusStyle = (status) => {
 };
 
 const extractRows = (sales) =>
+  // Transforme les ventes et leurs lignes en lignes de tableau lisibles.
   sales.flatMap((sale) => {
     const lines = sale.lignes?.length ? sale.lignes : [{}];
 
@@ -37,6 +39,7 @@ export default function Sales() {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
+    // Charge les ventes et les utilisateurs pour calculer les KPI vendeurs.
     Promise.all([getSales(), getUsers()])
       .then(([salesData, usersData]) => {
         setSales(salesData);
@@ -49,6 +52,7 @@ export default function Sales() {
       });
   }, []);
 
+  // Derive les valeurs affichees a partir des donnees backend.
   const rows = useMemo(() => extractRows(sales), [sales]);
   const totalSales = sales.reduce((sum, sale) => sum + Number(sale.prix_total || 0), 0);
   const totalCommission = Math.round(totalSales * 0.05);

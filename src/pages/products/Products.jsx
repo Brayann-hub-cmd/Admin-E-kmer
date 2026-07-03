@@ -1,17 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
-import { FaBan, FaEye, FaSearch, FaTrash } from "react-icons/fa";
+import { FaBan, FaEye, FaSearch, FaTrash, FaTimes, FaMapMarkerAlt, FaUserAlt, FaTags, FaBoxOpen } from "react-icons/fa";
 import { getCategories, getSubCategories } from "../../services/categories.service";
 import { deleteProduct, getProducts, updateProductStatus } from "../../services/products.service";
 
 const API_ROOT = (import.meta.env.VITE_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
 
 const resolveImage = (image) => {
+  // Le backend peut renvoyer une URL absolue ou un chemin media relatif.
   if (!image) return "";
   if (String(image).startsWith("http")) return image;
   return `${API_ROOT}${String(image).startsWith("/") ? image : `/${image}`}`;
 };
 
 const normalizeStatus = (status) => {
+  // Uniformise les differents libelles backend en deux statuts admin.
   const value = String(status || "").toLowerCase();
   if (value.includes("suspend") || value.includes("bloqu")) return "Suspendu";
   return "Actif";
@@ -28,8 +30,12 @@ export default function Products() {
   const [subCategories, setSubCategories] = useState([]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
+  
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [productToDelete, setProductToDelete] = useState(null);
 
   useEffect(() => {
+    // Charge les annonces, categories et sous-categories au montage de la page.
     loadProducts();
   }, []);
 
@@ -50,6 +56,7 @@ export default function Products() {
   };
 
   const categoryBySubCategory = useMemo(() => {
+    // Cree une table de correspondance: code sous-categorie -> nom categorie.
     const categoriesByCode = new Map(categories.map((category) => [category.code, category.nom]));
     return new Map(
       subCategories.map((subCategory) => [
@@ -60,6 +67,7 @@ export default function Products() {
   }, [categories, subCategories]);
 
   const filteredProducts = products.filter((product) => {
+    // Applique localement le filtre de recherche et le filtre de statut.
     const currentStatus = normalizeStatus(product.statut);
     const matchesStatus = status === "all" || currentStatus === status;
     const matchesSearch = product.titre?.toLowerCase().includes(search.toLowerCase());
@@ -67,6 +75,7 @@ export default function Products() {
   });
 
   const handleSuspend = async (product) => {
+    // Bascule le statut du produit puis recharge la liste depuis l'API.
     const nextStatus = normalizeStatus(product.statut) === "Actif" ? "Suspendu" : "Disponible";
     try {
       await updateProductStatus(product.code, { statut: nextStatus });
@@ -79,15 +88,28 @@ export default function Products() {
     }
   };
 
-  const handleDelete = async (product) => {
-    if (!window.confirm("Supprimer ce produit ?")) return;
+  const handleDeleteClick = (product) => {
+    setProductToDelete(product);
+  };
+
+  const confirmDeleteProduct = async () => {
+    if (!productToDelete) return;
     try {
-      await deleteProduct(product.code);
+      await deleteProduct(productToDelete.code);
       loadProducts();
+      setProductToDelete(null);
     } catch (error) {
       console.error(error);
-      setProducts((current) => current.filter((item) => item.code !== product.code));
+      setProducts((current) => current.filter((item) => item.code !== productToDelete.code));
+      setProductToDelete(null);
     }
+  };
+
+  const getCategoryLabel = (product) => {
+    return product.categorieLabel ||
+           categoryBySubCategory.get(product.sous_categorie) ||
+           product.sous_categorie?.nom ||
+           "-";
   };
 
   return (
@@ -139,11 +161,7 @@ export default function Products() {
           <tbody>
             {filteredProducts.map((product) => {
               const productStatus = normalizeStatus(product.statut);
-              const categoryLabel =
-                product.categorieLabel ||
-                categoryBySubCategory.get(product.sous_categorie) ||
-                product.sous_categorie?.nom ||
-                "-";
+              const categoryLabel = getCategoryLabel(product);
 
               return (
                 <tr key={product.code} className="border-b border-gray-200 last:border-b-0">
@@ -170,19 +188,23 @@ export default function Products() {
                   </td>
                   <td className="p-5">
                     <div className="flex gap-4">
-                      <button className="w-11 h-11 rounded-xl bg-blue-100 text-blue-500 inline-flex items-center justify-center" title="Voir">
+                      <button 
+                        onClick={() => setSelectedProduct(product)}
+                        className="w-11 h-11 rounded-xl bg-blue-100 text-blue-500 inline-flex items-center justify-center hover:bg-blue-200 transition" 
+                        title="Voir"
+                      >
                         <FaEye />
                       </button>
                       <button
                         onClick={() => handleSuspend(product)}
-                        className="w-11 h-11 rounded-xl bg-yellow-100 text-yellow-600 inline-flex items-center justify-center"
-                        title="Bloquer"
+                        className="w-11 h-11 rounded-xl bg-yellow-100 text-yellow-600 inline-flex items-center justify-center hover:bg-yellow-200 transition"
+                        title={productStatus === "Actif" ? "Suspendre" : "Activer"}
                       >
                         <FaBan />
                       </button>
                       <button
-                        onClick={() => handleDelete(product)}
-                        className="w-11 h-11 rounded-xl bg-red-100 text-red-500 inline-flex items-center justify-center"
+                        onClick={() => handleDeleteClick(product)}
+                        className="w-11 h-11 rounded-xl bg-red-100 text-red-500 inline-flex items-center justify-center hover:bg-red-200 transition"
                         title="Supprimer"
                       >
                         <FaTrash />
@@ -202,6 +224,158 @@ export default function Products() {
           </tbody>
         </table>
       </div>
+
+      {/* Modale de Détails du Produit */}
+      {selectedProduct && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[28px] w-[800px] max-w-[95vw] max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-950">Détails du Produit</h2>
+                <p className="text-gray-500 mt-1">Code: {selectedProduct.code}</p>
+              </div>
+              <button 
+                onClick={() => setSelectedProduct(null)}
+                className="w-11 h-11 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-1 flex flex-col md:flex-row gap-8">
+              {/* Image Section */}
+              <div className="md:w-1/3">
+                <div className="bg-gray-100 rounded-2xl aspect-square overflow-hidden mb-4">
+                  {selectedProduct.image ? (
+                    <img 
+                      src={resolveImage(selectedProduct.image)} 
+                      alt={selectedProduct.titre} 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      Pas d'image
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Info Section */}
+              <div className="md:w-2/3 space-y-5">
+                <div>
+                  <h3 className="text-2xl font-semibold text-gray-950">{selectedProduct.titre}</h3>
+                  <div className="flex items-center gap-3 mt-3 flex-wrap">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusClass[normalizeStatus(selectedProduct.statut)]}`}>
+                      {normalizeStatus(selectedProduct.statut)}
+                    </span>
+                    <span className="text-xl font-bold text-orange-500">
+                      {Number(selectedProduct.prix || 0).toLocaleString("fr-FR")} FCFA
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center">
+                      <FaUserAlt />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Vendeur</p>
+                      <p className="font-medium text-gray-900">{selectedProduct.vendeur?.username || "Vendeur inconnu"}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-500 flex items-center justify-center">
+                      <FaTags />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Catégorie</p>
+                      <p className="font-medium text-gray-900">{getCategoryLabel(selectedProduct)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center">
+                      <FaBoxOpen />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Stock</p>
+                      <p className="font-medium text-gray-900">{selectedProduct.qte || 0} unité(s)</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-green-100 text-green-500 flex items-center justify-center">
+                      <FaMapMarkerAlt />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Localisation</p>
+                      <p className="font-medium text-gray-900 line-clamp-1" title={selectedProduct.localisation}>{selectedProduct.localisation || "-"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Description</h4>
+                  <p className="text-gray-600 text-sm whitespace-pre-wrap leading-relaxed">
+                    {selectedProduct.description || "Aucune description fournie."}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-gray-100 flex justify-end gap-4 bg-gray-50">
+              <button 
+                onClick={() => {
+                  handleSuspend(selectedProduct);
+                  setSelectedProduct(null);
+                }} 
+                className="px-6 py-3 rounded-xl border border-gray-300 font-medium text-gray-700 bg-white hover:bg-gray-50"
+              >
+                {normalizeStatus(selectedProduct.statut) === "Actif" ? "Suspendre le produit" : "Réactiver le produit"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modale de Suppression de Produit */}
+      {productToDelete && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white w-[520px] max-w-full rounded-3xl p-8">
+            <div className="flex justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-red-600">Supprimer le produit</h2>
+                <p className="text-gray-500 mt-1">
+                  Voulez-vous vraiment supprimer le produit <span className="font-semibold text-gray-950">"{productToDelete.titre}"</span> ?
+                </p>
+                <p className="text-sm text-gray-400 mt-2">
+                  Cette action est irréversible et retirera le produit de la marketplace.
+                </p>
+              </div>
+              <button 
+                onClick={() => setProductToDelete(null)} 
+                className="w-11 h-11 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200 shrink-0"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="flex justify-end gap-4 mt-8">
+              <button 
+                onClick={() => setProductToDelete(null)} 
+                className="px-6 py-3 rounded-xl border font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Annuler
+              </button>
+              <button 
+                onClick={confirmDeleteProduct} 
+                className="px-6 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium"
+              >
+                Confirmer la suppression
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

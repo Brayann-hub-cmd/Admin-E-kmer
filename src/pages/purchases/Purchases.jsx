@@ -7,6 +7,7 @@ const statusClass = {
 };
 
 const toRows = (sales) =>
+  // Deplie les ventes en lignes d'achat produit par produit.
   sales.flatMap((sale) => {
     const lines = sale.lignes?.length ? sale.lignes : [{}];
 
@@ -24,6 +25,7 @@ export default function Purchases() {
   const [purchases, setPurchases] = useState([]);
 
   useEffect(() => {
+    // Recupere les ventes pour afficher l'historique des achats plateforme.
     getSales()
       .then((sales) => setPurchases(toRows(sales)))
       .catch((error) => {

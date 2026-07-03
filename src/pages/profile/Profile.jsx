@@ -3,6 +3,7 @@ import { FaUserCircle } from "react-icons/fa";
 import authService from "../../services/auth.service";
 
 const getStoredUser = () => {
+  // Secours local si l'endpoint profile echoue ou si le backend est indisponible.
   try {
     return JSON.parse(localStorage.getItem("user") || "{}");
   } catch {
@@ -11,6 +12,7 @@ const getStoredUser = () => {
 };
 
 const formatRole = (role) => {
+  // Traduit les roles techniques du backend en libelles lisibles.
   const value = String(role || "").toLowerCase();
   if (value === "admin") return "Administrateur";
   if (value.includes("vendeur") || value.includes("seller")) return "Vendeur";
@@ -28,6 +30,7 @@ export default function Profile() {
   }, []);
 
   const loadProfile = async () => {
+    // Charge le profil depuis GET /api/auth/profile/.
     try {
       const data = await authService.profile();
       setProfile(data);

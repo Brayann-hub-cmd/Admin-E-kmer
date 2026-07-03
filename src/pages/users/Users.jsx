@@ -34,8 +34,20 @@ const shortId = (id, index) => {
 };
 
 export default function Users() {
+  // Liste des utilisateurs récupérée depuis l'API
   const [users, setUsers] = useState([]);
+  
+  // État pour contrôler l'affichage de la modale d'ajout d'utilisateur
   const [showModal, setShowModal] = useState(false);
+  
+  // État pour la modale de suspension d'utilisateur
+  const [userToSuspend, setUserToSuspend] = useState(null);
+  
+  // Utilisateur actuellement connecté (récupéré depuis le localStorage)
+  // Permet notamment d'empêcher un administrateur de se supprimer lui-même
+  const [currentUser, setCurrentUser] = useState({});
+
+  // Données du formulaire d'ajout
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -45,7 +57,19 @@ export default function Users() {
     is_active: true,
   });
 
+  // Le hook useEffect s'exécute au chargement du composant
   useEffect(() => {
+    // Récupère l'utilisateur connecté stocké en chaîne JSON
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        setCurrentUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Erreur parsing utilisateur", e);
+      }
+    }
+    
+    // Charge la liste complète des utilisateurs
     loadUsers();
   }, []);
 
@@ -59,27 +83,45 @@ export default function Users() {
     }
   };
 
+  // Fonction pour traiter la soumission du formulaire
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
       await createUser(formData);
-      setShowModal(false);
+      setShowModal(false); // Ferme la modale en cas de succès
+      // Réinitialise le formulaire
       setFormData({ username: "", email: "", telephone: "", password: "", role: "user", is_active: true });
-      loadUsers();
+      loadUsers(); // Recharge la liste
     } catch (error) {
       console.error(error);
       alert(error?.response?.data?.error || "Erreur serveur");
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Supprimer cet utilisateur ?")) return;
+  // Fonction pour afficher la modale de suspension
+  const handleDeleteClick = (user) => {
+    // Sécurité supplémentaire côté front-end (l'admin ne doit pas se supprimer)
+    if (user.id === currentUser.id) {
+      alert("Vous ne pouvez pas suspendre votre propre compte administrateur.");
+      return;
+    }
+    // Ouvre la modale en définissant l'utilisateur cible
+    setUserToSuspend(user);
+  };
+
+  // Fonction pour valider la suspension/suppression
+  const confirmSuspend = async () => {
+    if (!userToSuspend) return;
+    
     try {
-      await deleteUser(id);
-      loadUsers();
+      await deleteUser(userToSuspend.id);
+      loadUsers(); // Met à jour la liste après suppression
+      setUserToSuspend(null); // Ferme la modale
     } catch (error) {
       console.error(error);
-      setUsers((current) => current.filter((user) => user.id !== id));
+      // Fallback : supprime visuellement en cas d'erreur de raffraîchissement
+      setUsers((current) => current.filter((user) => user.id !== userToSuspend.id));
+      setUserToSuspend(null);
     }
   };
 
@@ -146,13 +188,18 @@ export default function Users() {
                   </td>
                   <td className="p-5">
                     <div className="flex justify-end">
-                      <button
-                        onClick={() => handleDelete(user.id)}
-                        className="w-14 h-10 rounded-xl bg-red-100 text-red-500 inline-flex items-center justify-center hover:bg-red-200"
-                        title="Supprimer"
-                      >
-                        <FaTrash />
-                      </button>
+                      {/* On masque le bouton de suppression si c'est l'utilisateur actuellement connecté */}
+                      {user.id !== currentUser.id ? (
+                        <button
+                          onClick={() => handleDeleteClick(user)}
+                          className="w-14 h-10 rounded-xl bg-red-100 text-red-500 inline-flex items-center justify-center hover:bg-red-200 transition-colors"
+                          title="Suspendre"
+                        >
+                          <FaTrash />
+                        </button>
+                      ) : (
+                        <span className="text-xs text-gray-400 italic px-2">Mon compte</span>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -195,6 +242,46 @@ export default function Users() {
                 Ajouter
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modale de suspension d'utilisateur */}
+      {userToSuspend && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white w-[520px] max-w-[92vw] rounded-3xl p-8">
+            <div className="flex justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-semibold text-red-600">Suspendre un utilisateur</h2>
+                <p className="text-gray-500 mt-1">
+                  Voulez-vous vraiment suspendre le compte de <span className="font-semibold text-gray-950">{userToSuspend.username || "cet utilisateur"}</span> ?
+                </p>
+                <p className="text-sm text-gray-400 mt-2">
+                  L'utilisateur ne pourra plus se connecter et ses annonces seront affectées.
+                </p>
+              </div>
+              <button 
+                onClick={() => setUserToSuspend(null)} 
+                className="w-11 h-11 rounded-xl bg-gray-100 flex items-center justify-center hover:bg-gray-200"
+              >
+                x
+              </button>
+            </div>
+
+            <div className="flex justify-end gap-4 mt-8">
+              <button 
+                onClick={() => setUserToSuspend(null)} 
+                className="px-6 py-3 rounded-xl border font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Annuler
+              </button>
+              <button 
+                onClick={confirmSuspend} 
+                className="px-6 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium"
+              >
+                Confirmer la suspension
+              </button>
+            </div>
           </div>
         </div>
       )}

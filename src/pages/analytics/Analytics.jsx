@@ -24,6 +24,7 @@ const formatCurrency = (value) => `${Number(value || 0).toLocaleString("fr-FR")}
 const monthKey = (date) => new Intl.DateTimeFormat("fr-FR", { month: "short" }).format(date).replace(".", "");
 
 const buildMonthlySales = (sales) => {
+  // Regroupe le chiffre d'affaires par mois pour alimenter le graphique.
   const now = new Date();
   const months = Array.from({ length: 5 }, (_, index) => {
     const date = new Date(now.getFullYear(), now.getMonth() - (4 - index), 1);
@@ -46,6 +47,7 @@ const buildMonthlySales = (sales) => {
 };
 
 const buildCategoryData = (products, categories, subCategories) => {
+  // Calcule une repartition par categorie a partir des annonces.
   const categoryNameByCode = new Map(categories.map((category) => [category.code, category.nom]));
   const categoryBySubCode = new Map(
     subCategories.map((subCategory) => [
@@ -67,6 +69,7 @@ const buildCategoryData = (products, categories, subCategories) => {
 };
 
 const buildVendorData = (sales) => {
+  // Additionne les quantites vendues par vendeur.
   const totals = {};
 
   sales.forEach((sale) => {
@@ -90,6 +93,7 @@ export default function Analytics() {
   const [subCategories, setSubCategories] = useState([]);
 
   useEffect(() => {
+    // Recupere les donnees necessaires aux KPI et graphiques analytics.
     Promise.all([
       getSales(),
       getUsers(),
@@ -114,14 +118,19 @@ export default function Analytics() {
       });
   }, []);
 
+  // Memoise les calculs lourds pour eviter de les refaire a chaque rendu.
   const monthlySales = useMemo(() => buildMonthlySales(sales), [sales]);
   const categoryData = useMemo(
     () => buildCategoryData(products, categories, subCategories),
     [products, categories, subCategories]
   );
+  const isAdmin = (user) => {
+    const role = String(user.role || "").toLowerCase();
+    return role === "admin" || role === "superadmin" || user.is_staff === true || user.is_superuser === true;
+  };
   const vendorData = useMemo(() => buildVendorData(sales), [sales]);
   const revenue = sales.reduce((sum, sale) => sum + Number(sale.prix_total || 0), 0);
-  const activeUsers = users.filter((user) => user.is_active !== false).length;
+  const activeUsers = users.filter((user) => user.is_active !== false && !isAdmin(user)).length;
   const activeProducts = products.filter((product) => String(product.statut || "").toLowerCase() !== "suspendu").length;
   const conversion = users.length ? Math.round((sales.length / users.length) * 100) : 0;
 

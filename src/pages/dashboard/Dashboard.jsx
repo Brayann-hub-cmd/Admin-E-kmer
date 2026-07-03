@@ -44,6 +44,7 @@ const activityIcon = {
 
 const formatCurrency = (value) => `${Number(value || 0).toLocaleString("fr-FR")} FCFA`;
 
+// Carte reutilisable pour afficher un indicateur cle du dashboard.
 function DashboardCard({ icon, iconClass, value, label }) {
   return (
     <div className="bg-white rounded-2xl p-5 min-h-[180px] shadow-sm relative">
@@ -60,6 +61,7 @@ export default function Dashboard() {
   const [dashboard, setDashboard] = useState(null);
 
   useEffect(() => {
+    // Recupere les statistiques agregees depuis les services connectes au backend.
     getDashboardStats()
       .then(setDashboard)
       .catch((error) => {
@@ -71,6 +73,7 @@ export default function Dashboard() {
     return <div className="flex justify-center items-center h-[60vh] text-gray-500">Chargement...</div>;
   }
 
+  // Prepare les quatre KPI affiches en haut de la page.
   const cards = [
     {
       label: "Volume des ventes",
@@ -107,6 +110,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[2fr_0.95fr] gap-7">
+        {/* Evolution du volume de vente sur les derniers jours disponibles. */}
         <section className="bg-white rounded-3xl p-7 shadow-sm min-h-[548px]">
           <div className="flex items-start justify-between mb-8">
             <div>
@@ -147,6 +151,7 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </section>
 
+        {/* Commandes recentes construites depuis les ventes renvoyees par l'API. */}
         <section className="bg-white rounded-3xl p-7 shadow-sm min-h-[548px]">
           <div className="flex justify-between items-center mb-8">
             <h2 className="font-semibold text-xl text-gray-950">Commandes récentes</h2>
@@ -178,6 +183,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-7">
+        {/* Produits les plus vendus selon les lignes de ventes disponibles. */}
         <section className="bg-white rounded-3xl p-7 shadow-sm min-h-[472px]">
           <div className="flex justify-between items-center mb-8">
             <h2 className="font-semibold text-xl text-gray-950">Top produits</h2>
@@ -201,6 +207,7 @@ export default function Dashboard() {
           </div>
         </section>
 
+        {/* Repartition des produits par categorie/sous-categorie. */}
         <section className="bg-white rounded-3xl p-7 shadow-sm min-h-[472px]">
           <h2 className="font-semibold text-xl text-gray-950">Ventes par catégorie</h2>
           <p className="text-gray-500 mt-2">Répartition des ventes marketplace</p>
@@ -241,6 +248,7 @@ export default function Dashboard() {
           )}
         </section>
 
+        {/* Flux recent melangeant commandes et nouveaux utilisateurs. */}
         <section className="bg-white rounded-3xl p-7 shadow-sm min-h-[472px]">
           <h2 className="font-semibold text-xl text-gray-950">Activités récentes</h2>
           <p className="text-gray-500 mt-2 mb-8">Dernières actions marketplace</p>
