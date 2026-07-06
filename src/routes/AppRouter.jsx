@@ -30,10 +30,10 @@ export default function AppRouter() {
         />
 
         {/* REDIRECTION PAGE PRINCIPALE */}
-        <Route
+        {/* <Route
           path="/"
           element={<Navigate to="/admin/login" replace />}
-        />
+        /> */}
 
         {/* DASHBOARD */}
         <Route
