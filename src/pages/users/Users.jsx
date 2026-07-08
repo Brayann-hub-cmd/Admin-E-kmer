@@ -55,6 +55,7 @@ export default function Users() {
     password: "",
     role: "user",
     is_active: true,
+    avatar: "",
   });
 
   // Le hook useEffect s'exécute au chargement du composant
@@ -83,6 +84,21 @@ export default function Users() {
     }
   };
 
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert("L'image ne doit pas dépasser 2 Mo");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData((prev) => ({ ...prev, avatar: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Fonction pour traiter la soumission du formulaire
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -90,7 +106,7 @@ export default function Users() {
       await createUser(formData);
       setShowModal(false); // Ferme la modale en cas de succès
       // Réinitialise le formulaire
-      setFormData({ username: "", email: "", telephone: "", password: "", role: "user", is_active: true });
+      setFormData({ username: "", email: "", telephone: "", password: "", role: "user", is_active: true, avatar: "" });
       loadUsers(); // Recharge la liste
     } catch (error) {
       console.error(error);
@@ -232,6 +248,12 @@ export default function Users() {
               <input required type="email" placeholder="Email" className="w-full border p-4 rounded-xl" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
               <input placeholder="Téléphone" className="w-full border p-4 rounded-xl" value={formData.telephone} onChange={(e) => setFormData({ ...formData, telephone: e.target.value })} />
               <input required type="password" placeholder="Mot de passe" className="w-full border p-4 rounded-xl" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
+              
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-500 block">Photo de profil (optionnelle)</label>
+                <input type="file" accept="image/*" className="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100 transition-colors" onChange={handleAvatarChange} />
+              </div>
+
               <select className="w-full border p-4 rounded-xl" value={formData.role} onChange={(e) => setFormData({ ...formData, role: e.target.value })}>
                 <option value="user">Acheteur</option>
                 <option value="vendeur">Vendeur</option>

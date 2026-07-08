@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { FaBell, FaSearch, FaUserCircle } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
@@ -15,7 +16,17 @@ const formatRole = (role) => {
 };
 
 export default function Topbar() {
-  const user = getStoredUser();
+  const [user, setUser] = useState(getStoredUser());
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setUser(getStoredUser());
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   return (
     <div className="flex items-center justify-between mb-8">
@@ -29,15 +40,19 @@ export default function Topbar() {
       </div>
 
       <div className="flex items-center gap-5">
-        <Link to="/notifications" className="relative hover:text-orange-500 transition-colors">
+        {/* <Link to="/notifications" className="relative hover:text-orange-500 transition-colors">
           <FaBell className="text-xl" />
           <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center">
             3
           </span>
-        </Link>
+        </Link> */}
 
         <Link to="/profile" className="flex items-center gap-3 hover:text-orange-500 transition-colors">
-          <FaUserCircle className="text-4xl" />
+          {user.avatar ? (
+            <img src={user.avatar} alt={user.username} className="w-10 h-10 rounded-full object-cover border-2 border-orange-500/20" />
+          ) : (
+            <FaUserCircle className="text-4xl text-gray-400" />
+          )}
           <div>
             <p className="text-sm font-semibold">{user.username || "Admin"}</p>
             <span className="text-xs text-gray-500">{formatRole(user.role)}</span>

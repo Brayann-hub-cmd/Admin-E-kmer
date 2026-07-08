@@ -35,6 +35,25 @@ const authService = {
     return response.data;
   },
 
+  updateProfile: async (data) => {
+    const headers = data instanceof FormData ? { "Content-Type": "multipart/form-data" } : {};
+    const response = await api.put("auth/profile/", data, { headers });
+    
+    if (response.data) {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        try {
+          const userObj = JSON.parse(stored);
+          const updatedUser = { ...userObj, ...response.data };
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+    return response.data;
+  },
+
   getCurrentUser: () => {
     const user = localStorage.getItem("user");
     return user ? JSON.parse(user) : null;

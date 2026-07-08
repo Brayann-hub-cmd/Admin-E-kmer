@@ -6,6 +6,7 @@ import {
   FaShoppingCart,
   FaSignOutAlt,
   FaTags,
+  FaTruck,
   FaUserCircle,
   FaWallet,
 } from "react-icons/fa";
@@ -17,11 +18,10 @@ const navItems = [
   { to: "/analytics", label: "Analytics", icon: <FaChartBar /> },
   { to: "/categories", label: "Catégories", icon: <FaTags /> },
   { to: "/commandes", label: "Commandes", icon: <FaShoppingCart /> },
-  { to: "/livreurs", label: "Livreurs", icon: <FaMotorcycle /> },
+  { to: "/livreurs", label: "Livreurs", icon: <FaTruck /> },
   { to: "/parametres", label: "Paramètres", icon: <FaCog /> },
   { to: "/produits", label: "Produits", icon: <FaBoxOpen /> },
   { to: "/utilisateurs", label: "Utilisateurs", icon: <FaUserCircle /> },
-  // Notifications et Signalements ne sont pas encore gérés côté backend.
   // { to: "/notifications", label: "Notifications", icon: <FaBell /> },
   // { to: "/reports", label: "Signalements", icon: <FaExclamationTriangle /> },
 ];

@@ -224,10 +224,7 @@ export default function Dashboard() {
                     <Tooltip />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className="text-3xl font-semibold text-gray-900">100%</span>
-                  <span className="text-gray-500">Total ventes</span>
-                </div>
+                
               </div>
               <div className="grid grid-cols-2 gap-5 mt-2">
                 {dashboard.ventesParCategorie.map((category) => (
