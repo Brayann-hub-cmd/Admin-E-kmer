@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Layout from "../components/layout/Layout";
-import ProtectedRoute from "./ProtectedRoute";
 
 import Dashboard from "../pages/dashboard/Dashboard";
 import Orders from "../pages/orders/Orders";
@@ -30,18 +29,16 @@ export default function AppRouter() {
         />
 
         {/* REDIRECTION PAGE PRINCIPALE */}
-        <Route
+        {/* <Route
           path="/"
           element={<Navigate to="/admin/login" replace />}
-        />
+        /> */}
 
         {/* DASHBOARD */}
         <Route
           path="/admin"
           element={
-            <ProtectedRoute>
-              <Layout><Dashboard /></Layout>
-            </ProtectedRoute>
+            <Layout><Dashboard /></Layout>
           }
         />
 
@@ -49,9 +46,7 @@ export default function AppRouter() {
         <Route
           path="/commandes"
           element={
-            <ProtectedRoute>
-              <Layout><Orders /></Layout>
-            </ProtectedRoute>
+            <Layout><Orders /></Layout>
           }
         />
 
@@ -59,9 +54,7 @@ export default function AppRouter() {
         <Route
           path="/categories"
           element={
-            <ProtectedRoute>
-              <Layout><Categories /></Layout>
-            </ProtectedRoute>
+            <Layout><Categories /></Layout>
           }
         />
 
@@ -69,9 +62,7 @@ export default function AppRouter() {
         <Route
           path="/ventes"
           element={
-            <ProtectedRoute>
-              <Layout><Sales /></Layout>
-            </ProtectedRoute>
+            <Layout><Sales /></Layout>
           }
         />
 
@@ -79,9 +70,7 @@ export default function AppRouter() {
         <Route
           path="/achats"
           element={
-            <ProtectedRoute>
-              <Layout><Purchases /></Layout>
-            </ProtectedRoute>
+            <Layout><Purchases /></Layout>
           }
         />
 
@@ -89,54 +78,42 @@ export default function AppRouter() {
         <Route
           path="/parametres"
           element={
-            <ProtectedRoute>
-              <Layout><Settings /></Layout>
-            </ProtectedRoute>
+            <Layout><Settings /></Layout>
           }
         />
 
         <Route
           path="/profile"
           element={
-            <ProtectedRoute>
-              <Layout><Profile /></Layout>
-            </ProtectedRoute>
+            <Layout><Profile /></Layout>
           }
         />
 
         <Route
           path="/utilisateurs"
           element={
-            <ProtectedRoute>
-              <Layout><Users /></Layout>
-            </ProtectedRoute>
+            <Layout><Users /></Layout>
           }
         />
 
         <Route
           path="/analytics"
           element={
-            <ProtectedRoute>
-              <Layout><Analytics /></Layout>
-            </ProtectedRoute>
+            <Layout><Analytics /></Layout>
           }
         />
 
         <Route
           path="/produits"
           element={
-            <ProtectedRoute>
-              <Layout><Products /></Layout>
-            </ProtectedRoute>
+            <Layout><Products /></Layout>
           }
         />
 
         <Route
           path="/reports"
           element={
-            <ProtectedRoute>
-              <Layout><Reports /></Layout>
-            </ProtectedRoute>
+            <Layout><Reports /></Layout>
           }
         />
 
@@ -144,9 +121,7 @@ export default function AppRouter() {
         <Route
           path="/livreurs"
           element={
-            <ProtectedRoute>
-              <Layout><Livreurs /></Layout>
-            </ProtectedRoute>
+            <Layout><Livreurs /></Layout>
           }
         />
 
@@ -154,9 +129,7 @@ export default function AppRouter() {
         <Route
           path="/notifications"
           element={
-            <ProtectedRoute>
-              <Layout><Notifications /></Layout>
-            </ProtectedRoute>
+            <Layout><Notifications /></Layout>
           }
         />
 
