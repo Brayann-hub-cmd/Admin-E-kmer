@@ -1,3 +1,55 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ===== Sidebar tooltip (visible only when sidebar is collapsed, below lg) ===== */
+.sidebar-tooltip {
+  @apply absolute left-full ml-3 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap
+         bg-gray-900 text-white shadow-lg
+         opacity-0 invisible pointer-events-none
+         transition-all duration-200 ease-out
+         translate-x-1
+         z-50;
+}
+
+/* Show tooltip on hover, but only on screens below lg (collapsed mode) */
+@media (max-width: 1023px) {
+  .group:hover .sidebar-tooltip,
+  .group:focus-visible .sidebar-tooltip {
+    @apply opacity-100 visible translate-x-0;
+  }
+}
+
+/* On lg+ the sidebar is expanded, so hide tooltips entirely */
+@media (min-width: 1024px) {
+  .sidebar-tooltip {
+    @apply hidden;
+  }
+}
+
+/* ===== Mobile sidebar slide-in animation ===== */
+.sidebar-slide-in {
+  animation: slideInLeft 0.25s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0.5;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ===== Smooth scrollbar for sidebar ===== */
+.sidebar-desktop::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-desktop::-webkit-scrollbar-thumb {
+  @apply bg-gray-200 rounded-full;
+}
+.sidebar-desktop::-webkit-scrollbar-track {
+  background: transparent;
+}

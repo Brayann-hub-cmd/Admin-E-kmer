@@ -16,12 +16,12 @@ api.interceptors.request.use((config) => {
 });
 
 // Handle 401 responses globally — redirect to login
+// The token is managed server-side, so we do NOT remove it from localStorage here.
+// Token removal should only happen on explicit logout (via authService.logout or Sidebar).
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
       if (window.location.pathname !== "/admin/login") {
         window.location.href = "/admin/login";
       }

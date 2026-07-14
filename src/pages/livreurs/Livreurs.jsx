@@ -96,39 +96,41 @@ export default function Livreurs() {
 
   return (
     <div>
-      <div className="flex justify-between items-start mb-10">
+      {/* Header responsive */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 md:mb-10">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-950">Livreurs</h1>
-          <p className="text-gray-500 mt-1">Gestion de la flotte de livraison</p>
+          <h1 className="text-xl md:text-2xl font-semibold text-gray-950">Livreurs</h1>
+          <p className="text-gray-500 mt-1 text-sm md:text-base">Gestion de la flotte de livraison</p>
         </div>
         <button
           onClick={loadLivreurs}
-          className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-3 rounded-xl flex items-center gap-2 font-medium"
+          className="bg-orange-500 hover:bg-orange-600 text-white px-4 md:px-5 py-2.5 md:py-3 rounded-xl flex items-center gap-2 font-medium text-sm md:text-base whitespace-nowrap"
         >
           <FaUserCheck />
           Actualiser
         </button>
       </div>
 
-      {/* Filtres de statut */}
-      <div className="flex gap-3 mb-6 flex-wrap">
+      {/* Filtres de statut — scrollable horizontalement sur mobile */}
+      <div className="flex gap-2 md:gap-3 mb-6 overflow-x-auto pb-1 -mx-1 px-1">
         {["tous", "disponible", "occupé", "hors ligne"].map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`px-5 py-2.5 rounded-xl font-medium capitalize transition-colors ${
+            className={`px-3.5 md:px-5 py-2 md:py-2.5 rounded-xl font-medium capitalize transition-colors text-sm md:text-base whitespace-nowrap shrink-0 ${
               filter === f
                 ? "bg-orange-500 text-white"
                 : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
             }`}
           >
             {f === "tous" ? "Tous" : f.charAt(0).toUpperCase() + f.slice(1)}
-            <span className="ml-2 text-sm opacity-75">({counts[f] ?? 0})</span>
+            <span className="ml-1.5 md:ml-2 text-xs md:text-sm opacity-75">({counts[f] ?? 0})</span>
           </button>
         ))}
       </div>
 
-      <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
+      {/* ========= DESKTOP TABLE (hidden on mobile) ========= */}
+      <div className="hidden md:block bg-white rounded-3xl shadow-sm overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr className="text-gray-600">
@@ -230,6 +232,100 @@ export default function Livreurs() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* ========= MOBILE CARDS (shown on mobile only) ========= */}
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          <div className="bg-white rounded-2xl p-8 text-center text-gray-400 shadow-sm">
+            Chargement...
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="bg-white rounded-2xl p-8 text-center text-gray-400 shadow-sm">
+            Aucun livreur trouvé.
+          </div>
+        ) : (
+          filtered.map((livreur, index) => {
+            const statut = String(livreur.statut || livreur.status || "hors ligne").toLowerCase();
+            const statusCfg = statusConfig[statut] || statusConfig["hors ligne"];
+            const vehicleType = String(livreur.type_vehicule || livreur.vehicule || "moto").toLowerCase();
+            const icon = vehicleIcon[vehicleType] || vehicleIcon.moto;
+            const isValidated = livreur.is_validated === true;
+            const valCfg = validationConfig[String(isValidated)];
+
+            return (
+              <div
+                key={livreur.id || index}
+                className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
+              >
+                {/* Top: avatar + name */}
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-10 h-10 rounded-full ${avatarColors[index % avatarColors.length]} flex items-center justify-center text-lg text-gray-600 shrink-0`}
+                  >
+                    {livreur.avatar ? (
+                      <img src={livreur.avatar} alt="" className="w-full h-full object-cover rounded-full" />
+                    ) : (
+                      <FaMotorcycle />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-gray-950 text-sm truncate">
+                      {livreur.user?.username || livreur.username || livreur.nom || "Livreur"}
+                    </p>
+                    <p className="text-gray-500 text-xs truncate">
+                      {livreur.user?.email || livreur.email || ""}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Middle: info row */}
+                <div className="flex items-center flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
+                  {/* Vehicle */}
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-700">
+                    <span className="text-orange-500">{icon}</span>
+                    <span className="capitalize">{vehicleType}</span>
+                  </span>
+
+                  <span className="text-gray-300">·</span>
+
+                  {/* Status */}
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusCfg.className}`}>
+                    {statusCfg.label}
+                  </span>
+
+                  <span className="text-gray-300">·</span>
+
+                  {/* Validation */}
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${valCfg.className}`}>
+                    {valCfg.icon}
+                    {valCfg.label}
+                  </span>
+                </div>
+
+                {/* Bottom: actions */}
+                <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                  {!isValidated && (
+                    <button
+                      onClick={() => handleValidate(livreur.id)}
+                      className="flex-1 py-2 rounded-xl bg-green-100 text-green-600 hover:bg-green-200 text-xs font-medium flex items-center justify-center gap-1.5"
+                    >
+                      <FaCheckCircle />
+                      Valider
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleSuspend(livreur.id)}
+                    className={`${!isValidated ? "flex-1" : "w-full"} py-2 rounded-xl bg-red-100 text-red-500 hover:bg-red-200 text-xs font-medium flex items-center justify-center gap-1.5`}
+                  >
+                    <FaTimesCircle />
+                    Suspendre
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
