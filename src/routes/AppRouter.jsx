@@ -14,16 +14,22 @@ import Users from "../pages/users/Users";
 import Analytics from "../pages/analytics/Analytics";
 import Products from "../pages/products/Products";
 import Reports from "../pages/reports/Reports";
+import AdminLogin from "../pages/Admin/AdminLogin";
 export default function AppRouter() {
   return (
     <BrowserRouter>
 
       <Routes>
+    
 
         {/* REDIRECTION PAGE PRINCIPALE */}
         <Route
           path="/"
-          element={<Navigate to="/admin" replace />}
+          element={<Navigate to="/login" replace />}
+        />
+        <Route
+          path="/login"
+          element={<AdminLogin />}
         />
 
         <Route
