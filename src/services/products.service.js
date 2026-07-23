@@ -2,7 +2,9 @@ import api from "./api";
 
 export const getProducts = async () => {
   const response = await api.get("annonces/");
-  return Array.isArray(response.data) ? response.data : [];
+  if (Array.isArray(response.data)) return response.data;
+  if (Array.isArray(response.data?.results)) return response.data.results;
+  return [];
 };
 
 export const getProduct = async (code) => {
@@ -11,7 +13,7 @@ export const getProduct = async (code) => {
 };
 
 export const updateProductStatus = async (code, data) => {
-  const response = await api.patch(`annonces/${code}/`, data);
+  const response = await api.patch(`annonces/${code}/statut/`, data);
   return response.data;
 };
 
