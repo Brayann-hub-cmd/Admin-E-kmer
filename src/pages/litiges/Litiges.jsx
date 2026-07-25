@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import {
   FaExclamationTriangle,
   FaCheckCircle,
@@ -8,21 +9,6 @@ import {
 } from "react-icons/fa";
 import api from "../../services/api";
 
-const typeConfig = {
-  produit: { label: "Produit non conforme", className: "bg-orange-100 text-orange-700" },
-  livraison: { label: "Colis perdu/endommagé", className: "bg-red-100 text-red-700" },
-  paiement: { label: "Problème de paiement", className: "bg-purple-100 text-purple-700" },
-  fraude: { label: "Fraude signalée", className: "bg-red-200 text-red-800" },
-  autre: { label: "Autre litige", className: "bg-gray-100 text-gray-700" },
-};
-
-const statusConfig = {
-  ouvert: { label: "Ouvert", className: "bg-yellow-100 text-yellow-700", icon: <FaHourglassHalf /> },
-  en_cours: { label: "En cours", className: "bg-blue-100 text-blue-700", icon: <FaHourglassHalf /> },
-  resolu: { label: "Résolu", className: "bg-green-100 text-green-700", icon: <FaCheckCircle /> },
-  ferme: { label: "Fermé", className: "bg-gray-100 text-gray-600", icon: <FaTimesCircle /> },
-};
-
 const DEMO_LITIGES = [
   { id: 1, type: "produit", statut: "ouvert", acheteur: "Jean Dupont", vendeur: "Shop Electronique", commande: "#CMD-001", date: "2026-07-01", description: "Produit reçu endommagé, ne correspond pas à la description." },
   { id: 2, type: "livraison", statut: "en_cours", acheteur: "Marie Koné", vendeur: "Mode Yaoundé", commande: "#CMD-002", date: "2026-06-28", description: "Colis jamais reçu 2 semaines après la commande." },
@@ -30,6 +16,23 @@ const DEMO_LITIGES = [
 ];
 
 export default function Litiges() {
+  const { t } = useTranslation();
+
+  const typeConfig = {
+    produit: { label: t('litiges.typeProduit'), className: "bg-orange-100 text-orange-700" },
+    livraison: { label: t('litiges.typeLivraison'), className: "bg-red-100 text-red-700" },
+    paiement: { label: t('litiges.typePaiement'), className: "bg-purple-100 text-purple-700" },
+    fraude: { label: t('litiges.typeFraude'), className: "bg-red-200 text-red-800" },
+    autre: { label: t('litiges.typeAutre'), className: "bg-gray-100 text-gray-700" },
+  };
+
+  const statusConfig = {
+    ouvert: { label: t('litiges.statusOuvert'), className: "bg-yellow-100 text-yellow-700", icon: <FaHourglassHalf /> },
+    en_cours: { label: t('litiges.statusEnCours'), className: "bg-blue-100 text-blue-700", icon: <FaHourglassHalf /> },
+    resolu: { label: t('litiges.statusResolu'), className: "bg-green-100 text-green-700", icon: <FaCheckCircle /> },
+    ferme: { label: t('litiges.statusFerme'), className: "bg-gray-100 text-gray-600", icon: <FaTimesCircle /> },
+  };
+
   const [litiges, setLitiges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -95,14 +98,14 @@ export default function Litiges() {
     <div>
       <div className="flex justify-between items-start mb-10">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-950">Litiges</h1>
-          <p className="text-gray-500 mt-1">Gestion des litiges et signalements utilisateurs</p>
+          <h1 className="text-2xl font-semibold text-gray-950">{t('litiges.title')}</h1>
+          <p className="text-gray-500 mt-1">{t('litiges.subtitle')}</p>
         </div>
         <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-2.5">
           <FaSearch className="text-gray-400" />
           <input
             type="text"
-            placeholder="Rechercher..."
+            placeholder={t('litiges.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="outline-none text-sm w-48"
@@ -113,7 +116,7 @@ export default function Litiges() {
       {/* Filtres */}
       <div className="flex gap-3 mb-6 flex-wrap">
         {["tous", "ouvert", "en_cours", "resolu", "ferme"].map((f) => {
-          const labels = { tous: "Tous", ouvert: "Ouverts", en_cours: "En cours", resolu: "Résolus", ferme: "Fermés" };
+          const labels = { tous: t('litiges.filterAll'), ouvert: t('litiges.filterOpen'), en_cours: t('litiges.filterInProgress'), resolu: t('litiges.filterResolved'), ferme: t('litiges.filterClosed') };
           return (
             <button
               key={f}
@@ -133,20 +136,20 @@ export default function Litiges() {
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr className="text-gray-600">
-              <th className="text-left p-5">Commande</th>
-              <th className="text-left p-5">Acheteur</th>
-              <th className="text-left p-5">Vendeur</th>
-              <th className="text-left p-5">Type</th>
-              <th className="text-left p-5">Statut</th>
-              <th className="text-left p-5">Date</th>
-              <th className="text-right p-5">Actions</th>
+              <th className="text-left p-5">{t('litiges.order')}</th>
+              <th className="text-left p-5">{t('litiges.buyer')}</th>
+              <th className="text-left p-5">{t('litiges.seller')}</th>
+              <th className="text-left p-5">{t('litiges.type')}</th>
+              <th className="text-left p-5">{t('litiges.statut')}</th>
+              <th className="text-left p-5">{t('litiges.date')}</th>
+              <th className="text-right p-5">{t('litiges.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="7" className="p-10 text-center text-gray-400">Chargement...</td></tr>
+              <tr><td colSpan="7" className="p-10 text-center text-gray-400">{t('litiges.loading')}</td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan="7" className="p-10 text-center text-gray-400">Aucun litige trouvé.</td></tr>
+              <tr><td colSpan="7" className="p-10 text-center text-gray-400">{t('litiges.noLitiges')}</td></tr>
             ) : (
               filtered.map((litige) => {
                 const typeCfg = typeConfig[litige.type] || typeConfig.autre;
@@ -171,10 +174,10 @@ export default function Litiges() {
                         {litige.statut !== "resolu" && litige.statut !== "ferme" && (
                           <>
                             <button onClick={() => handleResolve(litige.id)} className="px-3 py-2 rounded-xl bg-green-100 text-green-600 hover:bg-green-200 text-sm font-medium">
-                              Résoudre
+                              {t('litiges.resolve')}
                             </button>
                             <button onClick={() => handleClose(litige.id)} className="px-3 py-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 text-sm font-medium">
-                              Fermer
+                              {t('litiges.close')}
                             </button>
                           </>
                         )}
@@ -196,7 +199,7 @@ export default function Litiges() {
               <div>
                 <h2 className="text-xl font-semibold text-gray-950 flex items-center gap-2">
                   <FaExclamationTriangle className="text-orange-500" />
-                  Détail du litige
+                  {t('litiges.detailTitle')}
                 </h2>
                 <p className="text-gray-500 mt-1">{selected.commande}</p>
               </div>
@@ -205,27 +208,27 @@ export default function Litiges() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-gray-50 rounded-2xl p-4">
-                  <p className="text-xs text-gray-400 mb-1">Acheteur</p>
+                  <p className="text-xs text-gray-400 mb-1">{t('litiges.buyer')}</p>
                   <p className="font-semibold text-gray-800">{selected.acheteur}</p>
                 </div>
                 <div className="bg-gray-50 rounded-2xl p-4">
-                  <p className="text-xs text-gray-400 mb-1">Vendeur</p>
+                  <p className="text-xs text-gray-400 mb-1">{t('litiges.seller')}</p>
                   <p className="font-semibold text-gray-800">{selected.vendeur}</p>
                 </div>
               </div>
               <div className="bg-gray-50 rounded-2xl p-4">
-                <p className="text-xs text-gray-400 mb-1">Description</p>
-                <p className="text-gray-700">{selected.description || "Aucune description."}</p>
+                <p className="text-xs text-gray-400 mb-1">{t('litiges.description')}</p>
+                <p className="text-gray-700">{selected.description || t('litiges.noDescription')}</p>
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-8">
               {selected.statut !== "resolu" && selected.statut !== "ferme" && (
                 <>
-                  <button onClick={() => handleResolve(selected.id)} className="px-6 py-3 rounded-xl bg-green-500 text-white font-medium hover:bg-green-600">Marquer résolu</button>
-                  <button onClick={() => handleClose(selected.id)} className="px-6 py-3 rounded-xl bg-gray-200 text-gray-700 font-medium hover:bg-gray-300">Fermer le litige</button>
+                  <button onClick={() => handleResolve(selected.id)} className="px-6 py-3 rounded-xl bg-green-500 text-white font-medium hover:bg-green-600">{t('litiges.markResolved')}</button>
+                  <button onClick={() => handleClose(selected.id)} className="px-6 py-3 rounded-xl bg-gray-200 text-gray-700 font-medium hover:bg-gray-300">{t('litiges.closeLitige')}</button>
                 </>
               )}
-              <button onClick={() => setSelected(null)} className="px-6 py-3 rounded-xl border font-medium text-gray-600 hover:bg-gray-50">Fermer</button>
+              <button onClick={() => setSelected(null)} className="px-6 py-3 rounded-xl border font-medium text-gray-600 hover:bg-gray-50">{t('litiges.close')}</button>
             </div>
           </div>
         </div>

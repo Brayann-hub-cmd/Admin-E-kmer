@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { getSales } from "../../services/sales.service";
 
 const statusClass = {
@@ -22,6 +23,7 @@ const toRows = (sales) =>
   });
 
 export default function Purchases() {
+  const { t } = useTranslation();
   const [purchases, setPurchases] = useState([]);
 
   useEffect(() => {
@@ -37,19 +39,19 @@ export default function Purchases() {
   return (
     <div>
       <div className="mb-10">
-        <h1 className="text-2xl font-semibold text-gray-950">Achats</h1>
-        <p className="text-gray-500 mt-1">Historique des achats effectués sur la plateforme</p>
+        <h1 className="text-2xl font-semibold text-gray-950">{t('purchases.title')}</h1>
+        <p className="text-gray-500 mt-1">{t('purchases.subtitle')}</p>
       </div>
 
       <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="p-5 text-left">Acheteur</th>
-              <th className="p-5 text-left">Produit</th>
-              <th className="p-5 text-left">Montant</th>
-              <th className="p-5 text-left">Paiement</th>
-              <th className="p-5 text-left">Statut</th>
+              <th className="p-5 text-left">{t('purchases.buyer')}</th>
+              <th className="p-5 text-left">{t('purchases.product')}</th>
+              <th className="p-5 text-left">{t('purchases.amount')}</th>
+              <th className="p-5 text-left">{t('purchases.payment')}</th>
+              <th className="p-5 text-left">{t('purchases.statut')}</th>
             </tr>
           </thead>
 
@@ -70,7 +72,7 @@ export default function Purchases() {
             {!purchases.length && (
               <tr>
                 <td colSpan="5" className="p-10 text-center text-gray-500">
-                  Aucun achat trouvé.
+                  {t('purchases.noPurchases')}
                 </td>
               </tr>
             )}

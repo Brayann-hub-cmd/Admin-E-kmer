@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaFolderOpen, FaPlus, FaTimes, FaTrash } from "react-icons/fa";
+import { useTranslation } from 'react-i18next';
 import {
   createCategory,
   deleteCategory,
@@ -10,6 +11,7 @@ import {
 } from "../../services/categories.service";
 
 export default function Categories() {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSubCategoriesModal, setShowSubCategoriesModal] = useState(false);
@@ -129,8 +131,8 @@ export default function Categories() {
     <div>
       <div className="flex justify-between items-start mb-8">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-950">Catégories</h1>
-          <p className="text-gray-500 mt-1">Organisez les produits et articles par catégories</p>
+          <h1 className="text-2xl font-semibold text-gray-950">{t('categories.title')}</h1>
+          <p className="text-gray-500 mt-1">{t('categories.subtitle')}</p>
         </div>
 
         <button
@@ -138,7 +140,7 @@ export default function Categories() {
           className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-3 rounded-xl flex items-center gap-2 font-medium"
         >
           <FaPlus />
-          Ajouter une catégorie
+          {t('categories.addCategory')}
         </button>
       </div>
 
@@ -152,7 +154,7 @@ export default function Categories() {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="font-medium text-gray-950">{category.nom}</p>
-                <p className="text-sm text-gray-500 mt-1">Voir les sous-catégories</p>
+                <p className="text-sm text-gray-500 mt-1">{t('categories.viewSubcategories')}</p>
               </div>
               <div className="flex gap-2">
                 <button 
@@ -172,7 +174,7 @@ export default function Categories() {
 
         {!categories.length && (
           <div className="bg-white rounded-2xl shadow-sm px-7 py-8 text-gray-500 md:col-span-3 text-center">
-            Aucune catégorie trouvée.
+            {t('categories.noCategories')}
           </div>
         )}
       </div>
@@ -185,12 +187,12 @@ export default function Categories() {
                 <h2 className="text-xl font-semibold text-gray-950">
                   {selectedCategory?.nom}
                 </h2>
-                <p className="text-gray-500 mt-1">Sous-catégories associées</p>
+                <p className="text-gray-500 mt-1">{t('categories.associatedSubcategories')}</p>
               </div>
               <button
                 onClick={() => setShowSubCategoriesModal(false)}
                 className="w-11 h-11 rounded-2xl bg-gray-100 inline-flex items-center justify-center"
-                title="Fermer"
+                title={t('categories.close')}
               >
                 <FaTimes />
               </button>
@@ -201,7 +203,7 @@ export default function Categories() {
                 type="text" 
                 value={newSubCategoryName}
                 onChange={(e) => setNewSubCategoryName(e.target.value)}
-                placeholder="Nouvelle sous-catégorie..."
+                placeholder={t('categories.newSubcategory')}
                 className="flex-1 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-orange-200"
               />
               <button 
@@ -209,13 +211,13 @@ export default function Categories() {
                 disabled={!newSubCategoryName.trim()}
                 className="bg-orange-500 text-white px-5 py-3 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Ajouter
+                {t('categories.add')}
               </button>
             </form>
 
             <div className="overflow-y-auto flex-1 pr-2">
               {loadingSubCategories ? (
-                <p className="py-10 text-center text-gray-500">Chargement des sous-catégories...</p>
+                <p className="py-10 text-center text-gray-500">{t('categories.loadingSubcategories')}</p>
               ) : subCategories.length ? (
                 <div className="divide-y divide-gray-100 border border-gray-100 rounded-2xl overflow-hidden">
                   {subCategories.map((subCategory) => (
@@ -233,7 +235,7 @@ export default function Categories() {
                 </div>
               ) : (
                 <div className="border border-dashed border-gray-200 rounded-2xl py-10 text-center text-gray-500">
-                  Aucune sous-catégorie trouvée pour cette catégorie.
+                  {t('categories.noSubcategories')}
                 </div>
               )}
             </div>
@@ -246,13 +248,13 @@ export default function Categories() {
           <div className="bg-white rounded-[28px] w-[756px] max-w-[92vw] p-8">
             <div className="flex justify-between items-start mb-8">
               <div>
-                <h2 className="text-xl font-semibold">Ajouter une catégorie</h2>
-                <p className="text-gray-500 mt-1">Créez une nouvelle catégorie</p>
+                <h2 className="text-xl font-semibold">{t('categories.createCategory')}</h2>
+                <p className="text-gray-500 mt-1">{t('categories.createCategorySubtitle')}</p>
               </div>
               <button
                 onClick={() => setShowCreateModal(false)}
                 className="w-11 h-11 rounded-2xl bg-gray-100 inline-flex items-center justify-center"
-                title="Fermer"
+                title={t('categories.close')}
               >
                 <FaTimes />
               </button>
@@ -260,27 +262,27 @@ export default function Categories() {
 
             <form onSubmit={handleSubmit} className="space-y-7">
               <div>
-                <label className="font-medium text-gray-700">Nom catégorie</label>
+                <label className="font-medium text-gray-700">{t('categories.categoryName')}</label>
                 <input
                   value={formData.nom}
                   onChange={(event) => setFormData({ ...formData, nom: event.target.value })}
-                  placeholder="Ex: Électronique"
+                  placeholder={t('categories.namePlaceholder')}
                   className="mt-3 w-full border border-gray-200 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-orange-200"
                 />
               </div>
 
               <div>
-                <label className="font-medium text-gray-700">Description</label>
+                <label className="font-medium text-gray-700">{t('categories.description')}</label>
                 <textarea
                   value={formData.description}
                   onChange={(event) => setFormData({ ...formData, description: event.target.value })}
-                  placeholder="Description de la catégorie..."
+                  placeholder={t('categories.descriptionPlaceholder')}
                   className="mt-3 w-full border border-gray-200 rounded-2xl px-5 py-5 outline-none h-36 resize-none focus:ring-2 focus:ring-orange-200"
                 />
               </div>
 
               <div>
-                <label className="font-medium text-gray-700">Image catégorie</label>
+                <label className="font-medium text-gray-700">{t('categories.categoryImage')}</label>
                 <div className="mt-3 border border-dashed border-gray-300 rounded-2xl p-5">
                   <input
                     type="file"
@@ -296,10 +298,10 @@ export default function Categories() {
                   onClick={() => setShowCreateModal(false)}
                   className="px-7 py-4 border border-gray-300 rounded-2xl"
                 >
-                  Annuler
+                  {t('categories.cancel')}
                 </button>
                 <button type="submit" className="px-8 py-4 bg-orange-500 text-white rounded-2xl font-medium">
-                  Ajouter
+                  {t('categories.add')}
                 </button>
               </div>
             </form>
@@ -313,12 +315,12 @@ export default function Categories() {
           <div className="bg-white w-[520px] max-w-full rounded-3xl p-8">
             <div className="flex justify-between mb-6">
               <div>
-                <h2 className="text-xl font-semibold text-red-600">Supprimer la catégorie</h2>
+                <h2 className="text-xl font-semibold text-red-600">{t('categories.deleteCategoryTitle')}</h2>
                 <p className="text-gray-500 mt-1">
-                  Voulez-vous vraiment supprimer la catégorie <span className="font-semibold text-gray-950">"{categoryToDelete.nom}"</span> ?
+                  {t('categories.deleteCategoryConfirm', { name: categoryToDelete.nom })}
                 </p>
                 <p className="text-sm text-gray-400 mt-2">
-                  Cela supprimera également toutes ses sous-catégories. Cette action est irréversible.
+                  {t('categories.deleteCategoryWarning')}
                 </p>
               </div>
               <button 
@@ -334,13 +336,13 @@ export default function Categories() {
                 onClick={() => setCategoryToDelete(null)} 
                 className="px-6 py-3 rounded-xl border font-medium text-gray-700 hover:bg-gray-50"
               >
-                Annuler
+                {t('categories.cancel')}
               </button>
               <button 
                 onClick={confirmDeleteCategory} 
                 className="px-6 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium"
               >
-                Confirmer la suppression
+                {t('categories.confirmDelete')}
               </button>
             </div>
           </div>
@@ -353,12 +355,12 @@ export default function Categories() {
           <div className="bg-white w-[520px] max-w-full rounded-3xl p-8">
             <div className="flex justify-between mb-6">
               <div>
-                <h2 className="text-xl font-semibold text-red-600">Supprimer la sous-catégorie</h2>
+                <h2 className="text-xl font-semibold text-red-600">{t('categories.deleteSubcategoryTitle')}</h2>
                 <p className="text-gray-500 mt-1">
-                  Voulez-vous vraiment supprimer la sous-catégorie <span className="font-semibold text-gray-950">"{subCategoryToDelete.nom}"</span> ?
+                  {t('categories.deleteSubcategoryConfirm', { name: subCategoryToDelete.nom })}
                 </p>
                 <p className="text-sm text-gray-400 mt-2">
-                  Cette action est irréversible.
+                  {t('categories.irreversible')}
                 </p>
               </div>
               <button 
@@ -374,13 +376,13 @@ export default function Categories() {
                 onClick={() => setSubCategoryToDelete(null)} 
                 className="px-6 py-3 rounded-xl border font-medium text-gray-700 hover:bg-gray-50"
               >
-                Annuler
+                {t('categories.cancel')}
               </button>
               <button 
                 onClick={confirmDeleteSubCategory} 
                 className="px-6 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium"
               >
-                Confirmer la suppression
+                {t('categories.confirmDelete')}
               </button>
             </div>
           </div>

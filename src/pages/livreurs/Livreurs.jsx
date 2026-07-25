@@ -1,332 +1,279 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  FaBicycle,
-  FaCar,
-  FaMotorcycle,
-  FaTruck,
-  FaCheckCircle,
+  FaMapMarkerAlt,
+  FaPlus,
+  FaRedo,
   FaTimesCircle,
-  FaClock,
-  FaUserCheck,
+  FaTruck,
 } from "react-icons/fa";
 import api from "../../services/api";
 
-const vehicleIcon = {
-  moto: <FaMotorcycle />,
-  vélo: <FaBicycle />,
-  bicyclette: <FaBicycle />,
-  voiture: <FaCar />,
-  camion: <FaTruck />,
+const initialPartner = {
+  username: "",
+  email: "",
+  telephone: "",
+  password: "",
+  type_vehicule: "",
+  num_permis: "",
+  num_plaque: "",
 };
 
-const statusConfig = {
-  disponible: { label: "Disponible", className: "bg-green-100 text-green-700" },
-  occupé: { label: "Occupé", className: "bg-orange-100 text-orange-700" },
-  busy: { label: "Occupé", className: "bg-orange-100 text-orange-700" },
-  "hors ligne": { label: "Hors ligne", className: "bg-gray-100 text-gray-600" },
-  offline: { label: "Hors ligne", className: "bg-gray-100 text-gray-600" },
-  available: { label: "Disponible", className: "bg-green-100 text-green-700" },
-};
+const getStatus = (partner) =>
+  partner.disponible ? "actif" : "suspendu";
 
-const validationConfig = {
-  true: { label: "Validé", className: "bg-green-100 text-green-700", icon: <FaCheckCircle /> },
-  false: { label: "En attente", className: "bg-yellow-100 text-yellow-700", icon: <FaClock /> },
-};
-
-const avatarColors = ["bg-blue-100", "bg-green-100", "bg-orange-100", "bg-purple-100", "bg-pink-100"];
+const getName = (partner) =>
+  partner.nom_complet || partner.username || "—";
 
 export default function Livreurs() {
-  const [livreurs, setLivreurs] = useState([]);
+  const { t } = useTranslation();
+  const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("tous");
+  const [showCreate, setShowCreate] = useState(false);
+  const [newPartner, setNewPartner] = useState(initialPartner);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    loadLivreurs();
-  }, []);
+  const statusConfig = {
+    actif: { label: t("users.active"), className: "bg-green-100 text-green-700" },
+    suspendu: { label: t("users.suspended"), className: "bg-red-100 text-red-700" },
+  };
 
-  const loadLivreurs = async () => {
+  const loadPartners = async () => {
     setLoading(true);
     try {
       const response = await api.get("livreurs/");
-      const data = Array.isArray(response.data) ? response.data : [];
-      setLivreurs(data);
+      setPartners(Array.isArray(response.data) ? response.data : response.data.results || []);
     } catch (error) {
       console.error("Erreur chargement livreurs :", error);
-      // Données de démonstration si l'endpoint n'existe pas encore
-      setLivreurs([]);
+      setPartners([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleValidate = async (id) => {
+  useEffect(() => {
+    loadPartners();
+  }, []);
+
+  const handleCreate = async (event) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setMessage("");
     try {
-      await api.patch(`livreurs/${id}/`, { is_validated: true });
-      loadLivreurs();
+      const payload = {
+        email: newPartner.email,
+        telephone: newPartner.telephone,
+        username: newPartner.username || "Livreur",
+        password: newPartner.password || "E-Kmer" + Date.now().toString().slice(-4) + "!",
+      };
+      if (newPartner.type_vehicule) payload.type_vehicule = newPartner.type_vehicule;
+      if (newPartner.num_permis) payload.num_permis = newPartner.num_permis;
+      if (newPartner.num_plaque) payload.num_plaque = newPartner.num_plaque;
+      await api.post("auth/livreur/register/", payload);
+      setNewPartner(initialPartner);
+      setShowCreate(false);
+      setMessage(t("delivery.created", { password: payload.password }));
+      loadPartners();
     } catch (error) {
-      console.error("Erreur validation livreur :", error);
+      setMessage(error.response?.data?.error || "Erreur.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleSuspend = async (id) => {
+  const handleStatus = async (partner, disponible) => {
+    setMessage("");
     try {
-      await api.patch(`livreurs/${id}/`, { is_active: false });
-      loadLivreurs();
+      await api.patch(`livreurs/${partner.id}/`, { disponible });
+      setMessage(disponible ? t("delivery.activated") : t("delivery.suspendedMsg"));
+      loadPartners();
     } catch (error) {
-      console.error("Erreur suspension livreur :", error);
+      setMessage(error.response?.data?.error || "Erreur.");
     }
   };
 
   const counts = {
-    tous: livreurs.length,
-    disponible: livreurs.filter((l) => String(l.statut || l.status || "").toLowerCase() === "disponible" || l.statut === "available").length,
-    occupé: livreurs.filter((l) => String(l.statut || l.status || "").toLowerCase().includes("occup") || l.statut === "busy").length,
-    "hors ligne": livreurs.filter((l) => String(l.statut || l.status || "").toLowerCase().includes("hors") || l.statut === "offline").length,
+    tous: partners.length,
+    actif: partners.filter((p) => getStatus(p) === "actif").length,
+    suspendu: partners.filter((p) => getStatus(p) === "suspendu").length,
   };
 
-  const filtered = filter === "tous"
-    ? livreurs
-    : livreurs.filter((l) => {
-        const statut = String(l.statut || l.status || "").toLowerCase();
-        if (filter === "disponible") return statut === "disponible" || statut === "available";
-        if (filter === "occupé") return statut.includes("occup") || statut === "busy";
-        if (filter === "hors ligne") return statut.includes("hors") || statut === "offline";
-        return true;
-      });
+  const filteredPartners = filter === "tous"
+    ? partners
+    : partners.filter((p) => getStatus(p) === filter);
 
   return (
     <div>
-      {/* Header responsive */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 md:mb-10">
         <div>
-          <h1 className="text-xl md:text-2xl font-semibold text-gray-950">Livreurs</h1>
-          <p className="text-gray-500 mt-1 text-sm md:text-base">Gestion de la flotte de livraison</p>
+          <h1 className="text-xl md:text-2xl font-semibold text-gray-950">{t("delivery.title")}</h1>
+          <p className="text-gray-500 mt-1 text-sm md:text-base">{t("delivery.subtitle")}</p>
         </div>
-        <button
-          onClick={loadLivreurs}
-          className="bg-orange-500 hover:bg-orange-600 text-white px-4 md:px-5 py-2.5 md:py-3 rounded-xl flex items-center gap-2 font-medium text-sm md:text-base whitespace-nowrap"
-        >
-          <FaUserCheck />
-          Actualiser
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => setShowCreate(true)} className="bg-gray-900 hover:bg-black text-white px-4 py-2.5 rounded-xl flex items-center gap-2 font-medium text-sm whitespace-nowrap">
+            <FaPlus /> {t("delivery.addLivreur")}
+          </button>
+          <button onClick={loadPartners} className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 font-medium text-sm whitespace-nowrap">
+            <FaRedo /> {t("delivery.refresh")}
+          </button>
+        </div>
       </div>
 
-      {/* Filtres de statut — scrollable horizontalement sur mobile */}
-      <div className="flex gap-2 md:gap-3 mb-6 overflow-x-auto pb-1 -mx-1 px-1">
-        {["tous", "disponible", "occupé", "hors ligne"].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-3.5 md:px-5 py-2 md:py-2.5 rounded-xl font-medium capitalize transition-colors text-sm md:text-base whitespace-nowrap shrink-0 ${
-              filter === f
-                ? "bg-orange-500 text-white"
-                : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
-            }`}
-          >
-            {f === "tous" ? "Tous" : f.charAt(0).toUpperCase() + f.slice(1)}
-            <span className="ml-1.5 md:ml-2 text-xs md:text-sm opacity-75">({counts[f] ?? 0})</span>
+      <div className="grid gap-3 sm:grid-cols-2 mb-6">
+        <div className="rounded-2xl bg-white p-4 shadow-sm"><p className="text-sm text-gray-500">{t("delivery.activeDrivers")}</p><p className="mt-1 text-2xl font-semibold text-gray-950">{counts.actif}</p></div>
+        <div className="rounded-2xl bg-white p-4 shadow-sm"><p className="text-sm text-gray-500">{t("delivery.suspended")}</p><p className="mt-1 text-2xl font-semibold text-gray-950">{counts.suspendu}</p></div>
+      </div>
+
+      {message && <div className="mb-5 rounded-xl bg-orange-50 px-4 py-3 text-sm text-orange-800">{message}</div>}
+
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+        {["tous", "actif", "suspendu"].map((item) => (
+          <button key={item} onClick={() => setFilter(item)} className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap ${filter === item ? "bg-orange-500 text-white" : "bg-white text-gray-600 border border-gray-200"}`}>
+            {item === "tous" ? t("users.filterAll") : statusConfig[item].label} <span className="opacity-75">({counts[item]})</span>
           </button>
         ))}
       </div>
 
-      {/* ========= DESKTOP TABLE (hidden on mobile) ========= */}
-      <div className="hidden md:block bg-white rounded-3xl shadow-sm overflow-hidden">
-        <table className="w-full">
+      <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
+        <table className="w-full hidden md:table">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr className="text-gray-600">
-              <th className="text-left p-5">Livreur</th>
-              <th className="text-left p-5">Véhicule</th>
-              <th className="text-left p-5">Permis / Plaque</th>
-              <th className="text-left p-5">Statut</th>
-              <th className="text-left p-5">Validation</th>
-              <th className="text-right p-5">Actions</th>
+              <th className="text-left p-5">{t("delivery.driver")}</th>
+              <th className="text-left p-5">{t("delivery.vehicle")}</th>
+              <th className="text-left p-5">{t("delivery.routes")}</th>
+              <th className="text-left p-5">{t("users.status")}</th>
+              <th className="text-right p-5">{t("users.actions")}</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan="6" className="p-10 text-center text-gray-400">
-                  Chargement...
-                </td>
-              </tr>
-            ) : filtered.length === 0 ? (
-              <tr>
-                <td colSpan="6" className="p-10 text-center text-gray-400">
-                  Aucun livreur trouvé.
-                </td>
-              </tr>
-            ) : (
-              filtered.map((livreur, index) => {
-                const statut = String(livreur.statut || livreur.status || "hors ligne").toLowerCase();
-                const statusCfg = statusConfig[statut] || statusConfig["hors ligne"];
-                const vehicleType = String(livreur.type_vehicule || livreur.vehicule || "moto").toLowerCase();
-                const icon = vehicleIcon[vehicleType] || vehicleIcon.moto;
-                const isValidated = livreur.is_validated === true;
-                const valCfg = validationConfig[String(isValidated)];
-
-                return (
-                  <tr key={livreur.id || index} className="border-b border-gray-200 last:border-b-0">
-                    <td className="p-5">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-full ${avatarColors[index % avatarColors.length]} flex items-center justify-center text-xl text-gray-600`}>
-                          {livreur.avatar ? (
-                            <img src={livreur.avatar} alt="" className="w-full h-full object-cover rounded-full" />
-                          ) : (
-                            <FaMotorcycle />
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-gray-950">
-                            {livreur.user?.username || livreur.username || livreur.nom || "Livreur"}
-                          </p>
-                          <p className="text-gray-500 text-sm">
-                            {livreur.user?.email || livreur.email || ""}
-                          </p>
-                        </div>
+              <tr><td colSpan="5" className="p-10 text-center text-gray-400">...</td></tr>
+            ) : filteredPartners.length === 0 ? (
+              <tr><td colSpan="5" className="p-10 text-center text-gray-400">{t("users.noUsers")}</td></tr>
+            ) : filteredPartners.map((partner) => {
+              const status = getStatus(partner);
+              const config = statusConfig[status] || statusConfig.actif;
+              const routes = partner.trajets || [];
+              return (
+                <tr key={partner.id} className="border-b border-gray-100 last:border-0">
+                  <td className="p-5">
+                    <div className="flex items-center gap-3">
+                      <span className="grid h-10 w-10 place-items-center rounded-full bg-orange-100 text-orange-600"><FaTruck /></span>
+                      <div>
+                        <p className="font-semibold text-gray-950">{getName(partner)}</p>
+                        <p className="text-sm text-gray-500">{partner.email || "—"}</p>
                       </div>
-                    </td>
-                    <td className="p-5">
-                      <span className="inline-flex items-center gap-2 text-gray-700 font-medium">
-                        <span className="text-orange-500">{icon}</span>
-                        <span className="capitalize">{vehicleType}</span>
+                    </div>
+                  </td>
+                  <td className="p-5 text-gray-700 text-sm">
+                    {partner.type_vehicule || "—"}
+                    {partner.num_plaque && <span className="block text-xs text-gray-400">{partner.num_plaque}</span>}
+                  </td>
+                  <td className="p-5 text-gray-700 text-sm">
+                    {routes.length > 0 ? routes.map((r) => (
+                      <span key={r.id} className="inline-block mr-1 mb-1 px-2 py-0.5 rounded-full bg-gray-100 text-xs">
+                        {r.ville_depart} → {r.ville_arrivee} ({r.tarif} FCFA)
                       </span>
-                    </td>
-                    <td className="p-5 text-gray-600">
-                      <p className="text-sm">{livreur.num_permis || livreur.permis || "—"}</p>
-                      <p className="text-sm text-gray-400">{livreur.num_plaque || livreur.plaque || ""}</p>
-                    </td>
-                    <td className="p-5">
-                      <span className={`px-4 py-1.5 rounded-full text-sm font-medium ${statusCfg.className}`}>
-                        {statusCfg.label}
-                      </span>
-                    </td>
-                    <td className="p-5">
-                      <span className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium ${valCfg.className}`}>
-                        {valCfg.icon}
-                        {valCfg.label}
-                      </span>
-                    </td>
-                    <td className="p-5">
-                      <div className="flex justify-end gap-2">
-                        {!isValidated && (
-                          <button
-                            onClick={() => handleValidate(livreur.id)}
-                            className="px-4 py-2 rounded-xl bg-green-100 text-green-600 hover:bg-green-200 text-sm font-medium flex items-center gap-2"
-                          >
-                            <FaCheckCircle />
-                            Valider
-                          </button>
-                        )}
-                        <button
-                          onClick={() => handleSuspend(livreur.id)}
-                          className="px-4 py-2 rounded-xl bg-red-100 text-red-500 hover:bg-red-200 text-sm font-medium flex items-center gap-2"
-                        >
-                          <FaTimesCircle />
-                          Suspendre
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
+                    )) : <span className="text-gray-400">{t("delivery.noRoutes")}</span>}
+                  </td>
+                  <td className="p-5">
+                    <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${config.className}`}>{config.label}</span>
+                  </td>
+                  <td className="p-5 text-right">
+                    {status === "actif"
+                      ? <button onClick={() => handleStatus(partner, false)} className="text-sm font-medium text-red-600 hover:underline">{t("delivery.suspend")}</button>
+                      : <button onClick={() => handleStatus(partner, true)} className="text-sm font-medium text-green-600 hover:underline">{t("delivery.activate")}</button>}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
-      </div>
 
-      {/* ========= MOBILE CARDS (shown on mobile only) ========= */}
-      <div className="md:hidden space-y-3">
-        {loading ? (
-          <div className="bg-white rounded-2xl p-8 text-center text-gray-400 shadow-sm">
-            Chargement...
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl p-8 text-center text-gray-400 shadow-sm">
-            Aucun livreur trouvé.
-          </div>
-        ) : (
-          filtered.map((livreur, index) => {
-            const statut = String(livreur.statut || livreur.status || "hors ligne").toLowerCase();
-            const statusCfg = statusConfig[statut] || statusConfig["hors ligne"];
-            const vehicleType = String(livreur.type_vehicule || livreur.vehicule || "moto").toLowerCase();
-            const icon = vehicleIcon[vehicleType] || vehicleIcon.moto;
-            const isValidated = livreur.is_validated === true;
-            const valCfg = validationConfig[String(isValidated)];
-
+        <div className="md:hidden divide-y divide-gray-100">
+          {loading ? (
+            <p className="p-8 text-center text-gray-400">...</p>
+          ) : filteredPartners.length === 0 ? (
+            <p className="p-8 text-center text-gray-400">{t("users.noUsers")}</p>
+          ) : filteredPartners.map((partner) => {
+            const status = getStatus(partner);
+            const config = statusConfig[status] || statusConfig.actif;
+            const routes = partner.trajets || [];
             return (
-              <div
-                key={livreur.id || index}
-                className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100"
-              >
-                {/* Top: avatar + name */}
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-10 h-10 rounded-full ${avatarColors[index % avatarColors.length]} flex items-center justify-center text-lg text-gray-600 shrink-0`}
-                  >
-                    {livreur.avatar ? (
-                      <img src={livreur.avatar} alt="" className="w-full h-full object-cover rounded-full" />
-                    ) : (
-                      <FaMotorcycle />
-                    )}
+              <div key={partner.id} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex gap-3">
+                    <span className="grid h-10 w-10 place-items-center rounded-full bg-orange-100 text-orange-600"><FaTruck /></span>
+                    <div>
+                      <p className="font-semibold">{getName(partner)}</p>
+                      <p className="text-sm text-gray-500">{partner.email || ""}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-gray-950 text-sm truncate">
-                      {livreur.user?.username || livreur.username || livreur.nom || "Livreur"}
-                    </p>
-                    <p className="text-gray-500 text-xs truncate">
-                      {livreur.user?.email || livreur.email || ""}
-                    </p>
-                  </div>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.className}`}>{config.label}</span>
                 </div>
-
-                {/* Middle: info row */}
-                <div className="flex items-center flex-wrap gap-2 mt-3 pt-3 border-t border-gray-100">
-                  {/* Vehicle */}
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-700">
-                    <span className="text-orange-500">{icon}</span>
-                    <span className="capitalize">{vehicleType}</span>
-                  </span>
-
-                  <span className="text-gray-300">·</span>
-
-                  {/* Status */}
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusCfg.className}`}>
-                    {statusCfg.label}
-                  </span>
-
-                  <span className="text-gray-300">·</span>
-
-                  {/* Validation */}
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${valCfg.className}`}>
-                    {valCfg.icon}
-                    {valCfg.label}
-                  </span>
+                <div className="mt-3 grid gap-2 text-sm text-gray-600">
+                  {partner.type_vehicule && <span className="flex items-center gap-2"><FaTruck className="text-orange-500" />{partner.type_vehicule} {partner.num_plaque || ""}</span>}
+                  {routes.length > 0 && <span className="flex items-center gap-2"><FaMapMarkerAlt className="text-orange-500" />{routes.map((r) => `${r.ville_depart}→${r.ville_arrivee}`).join(', ')}</span>}
                 </div>
-
-                {/* Bottom: actions */}
-                <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
-                  {!isValidated && (
-                    <button
-                      onClick={() => handleValidate(livreur.id)}
-                      className="flex-1 py-2 rounded-xl bg-green-100 text-green-600 hover:bg-green-200 text-xs font-medium flex items-center justify-center gap-1.5"
-                    >
-                      <FaCheckCircle />
-                      Valider
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleSuspend(livreur.id)}
-                    className={`${!isValidated ? "flex-1" : "w-full"} py-2 rounded-xl bg-red-100 text-red-500 hover:bg-red-200 text-xs font-medium flex items-center justify-center gap-1.5`}
-                  >
-                    <FaTimesCircle />
-                    Suspendre
-                  </button>
+                <div className="mt-3">
+                  {status === "actif"
+                    ? <button onClick={() => handleStatus(partner, false)} className="text-sm font-medium text-red-600 hover:underline">{t("delivery.suspend")}</button>
+                    : <button onClick={() => handleStatus(partner, true)} className="text-sm font-medium text-green-600 hover:underline">{t("delivery.activate")}</button>}
                 </div>
               </div>
             );
-          })
-        )}
+          })}
+        </div>
       </div>
+
+      {showCreate && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
+          <form onSubmit={handleCreate} className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">{t("delivery.addTitle")}</h2>
+                <p className="mt-1 text-sm text-gray-500">{t("delivery.addSubtitle")}</p>
+              </div>
+              <button type="button" onClick={() => setShowCreate(false)} className="text-gray-400 hover:text-gray-700" aria-label="Close">
+                <FaTimesCircle className="text-xl" />
+              </button>
+            </div>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <Field label={`${t("delivery.name")} *`} value={newPartner.username} onChange={(value) => setNewPartner({ ...newPartner, username: value })} />
+              <Field label={`${t("delivery.email")} *`} type="email" value={newPartner.email} onChange={(value) => setNewPartner({ ...newPartner, email: value })} />
+              <Field label={`${t("delivery.phone")} *`} type="tel" value={newPartner.telephone} onChange={(value) => setNewPartner({ ...newPartner, telephone: value })} />
+              <Field label={t("delivery.password")} type="password" value={newPartner.password} onChange={(value) => setNewPartner({ ...newPartner, password: value })} placeholder={t("delivery.passwordAuto")} />
+              <Field label={t("delivery.vehicleType")} value={newPartner.type_vehicule} onChange={(value) => setNewPartner({ ...newPartner, type_vehicule: value })} placeholder="Moto, Voiture..." />
+              <Field label={t("delivery.licenseNumber")} value={newPartner.num_permis} onChange={(value) => setNewPartner({ ...newPartner, num_permis: value })} />
+              <Field label={t("delivery.plateNumber")} value={newPartner.num_plaque} onChange={(value) => setNewPartner({ ...newPartner, num_plaque: value })} />
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button type="button" onClick={() => setShowCreate(false)} className="rounded-lg px-4 py-2 text-gray-600">{t("users.cancel")}</button>
+              <button disabled={submitting} type="submit" className="rounded-lg bg-gray-900 px-4 py-2 text-white font-medium text-sm disabled:opacity-50">
+                {submitting ? t("delivery.creating") : t("delivery.create")}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
+  );
+}
+
+function Field({ label, type = "text", value, onChange, placeholder = "" }) {
+  return (
+    <label className="text-sm font-medium text-gray-700">
+      {label}
+      <input
+        required={label.includes("*")}
+        type={type}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 font-normal outline-none focus:border-orange-500"
+      />
+    </label>
   );
 }

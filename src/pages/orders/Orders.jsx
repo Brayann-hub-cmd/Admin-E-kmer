@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaEye, FaTimes } from "react-icons/fa";
+import { useTranslation } from 'react-i18next';
 import { getSales, getSaleDetails } from "../../services/sales.service";
 
 const normalizeStatus = (status) => {
@@ -17,6 +18,7 @@ const statusClass = {
 };
 
 export default function Orders() {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [orderDetails, setOrderDetails] = useState(null);
@@ -64,19 +66,19 @@ export default function Orders() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-950">Commandes</h1>
-        <p className="text-gray-500 mt-1">Gérez les commandes clients</p>
+        <h1 className="text-2xl font-semibold text-gray-950">{t('orders.title')}</h1>
+        <p className="text-gray-500 mt-1">{t('orders.subtitle')}</p>
       </div>
 
       <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr className="text-gray-600">
-              <th className="text-left p-5">N° Commande</th>
-              <th className="text-left p-5">Client</th>
-              <th className="text-left p-5">Total</th>
-              <th className="text-left p-5">Statut</th>
-              <th className="text-right p-5">Actions</th>
+              <th className="text-left p-5">{t('orders.orderNumber')}</th>
+              <th className="text-left p-5">{t('orders.client')}</th>
+              <th className="text-left p-5">{t('orders.total')}</th>
+              <th className="text-left p-5">{t('orders.statut')}</th>
+              <th className="text-right p-5">{t('orders.actions')}</th>
             </tr>
           </thead>
           <tbody>
@@ -86,7 +88,7 @@ export default function Orders() {
                 return (
                   <tr key={order.code} className="border-b border-gray-200 last:border-b-0">
                     <td className="p-5 font-semibold text-gray-950">{order.code}</td>
-                    <td className="p-5 text-gray-700">{order.acheteur_nom || "Client"}</td>
+                    <td className="p-5 text-gray-700">{order.acheteur_nom || t('orders.client')}</td>
                     <td className="p-5 font-medium">{Number(order.prix_total || order.total || 0).toLocaleString("fr-FR")} FCFA</td>
                     <td className="p-5">
                       <span className={`px-4 py-1.5 rounded-full text-sm font-medium ${statusClass[status]}`}>{status}</span>
@@ -95,7 +97,7 @@ export default function Orders() {
                       <button
                         onClick={() => openOrderDetails(order)}
                         className="w-11 h-11 rounded-xl bg-blue-50 text-blue-500 inline-flex items-center justify-center hover:bg-blue-100 transition-colors"
-                        title="Voir les détails"
+                        title={t('orders.viewDetails')}
                       >
                         <FaEye />
                       </button>
@@ -105,7 +107,7 @@ export default function Orders() {
               })
             ) : (
               <tr>
-                <td colSpan="5" className="py-10 text-center text-gray-500">Aucune commande trouvée.</td>
+                <td colSpan="5" className="py-10 text-center text-gray-500">{t('orders.noOrders')}</td>
               </tr>
             )}
           </tbody>
@@ -119,9 +121,9 @@ export default function Orders() {
             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
               <div>
                 <h2 className="text-xl font-semibold text-gray-950">
-                  Détails de la commande {selectedOrder.code}
+                  {t('orders.orderDetails', { code: selectedOrder.code })}
                 </h2>
-                <p className="text-gray-500 mt-1">Client : {selectedOrder.acheteur_nom || "Non renseigné"}</p>
+                <p className="text-gray-500 mt-1">{t('orders.clientLabel', { name: selectedOrder.acheteur_nom || t('orders.notSpecified') })}</p>
               </div>
               <button 
                 onClick={closeOrderDetails}
@@ -133,27 +135,27 @@ export default function Orders() {
 
             <div className="p-6 overflow-y-auto flex-1">
               {loadingDetails ? (
-                <div className="py-10 text-center text-gray-500">Chargement des détails...</div>
+                <div className="py-10 text-center text-gray-500">{t('orders.loadingDetails')}</div>
               ) : orderDetails ? (
                 <div className="space-y-6">
                   {/* Informations Générales */}
                   <div className="grid grid-cols-2 gap-4 bg-gray-50 p-5 rounded-2xl">
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Date</p>
+                      <p className="text-sm text-gray-500 mb-1">{t('orders.date')}</p>
                       <p className="font-medium text-gray-900">
                         {orderDetails.created_at ? new Date(orderDetails.created_at).toLocaleString('fr-FR') : '-'}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Mode de paiement</p>
+                      <p className="text-sm text-gray-500 mb-1">{t('orders.paymentMode')}</p>
                       <p className="font-medium text-gray-900">{orderDetails.mode_paiement || '-'}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Statut actuel</p>
+                      <p className="text-sm text-gray-500 mb-1">{t('orders.currentStatus')}</p>
                       <p className="font-medium text-gray-900">{normalizeStatus(orderDetails.statut)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Total</p>
+                      <p className="text-sm text-gray-500 mb-1">{t('orders.totalLabel')}</p>
                       <p className="font-medium text-gray-900 text-lg text-orange-600">
                         {Number(orderDetails.prix_total || 0).toLocaleString("fr-FR")} FCFA
                       </p>
@@ -162,14 +164,14 @@ export default function Orders() {
 
                   {/* Lignes de commande */}
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-4">Articles commandés</h3>
+                    <h3 className="font-semibold text-gray-900 mb-4">{t('orders.orderedArticles')}</h3>
                     {orderDetails.lignes && orderDetails.lignes.length > 0 ? (
                       <div className="border border-gray-100 rounded-2xl divide-y divide-gray-100">
                         {orderDetails.lignes.map((ligne, i) => (
                           <div key={i} className="p-4 flex items-center justify-between">
                             <div className="flex-1">
                               <p className="font-medium text-gray-900">{ligne.annonce_titre || ligne.titre || `Article #${ligne.annonce}`}</p>
-                              <p className="text-sm text-gray-500">Prix unitaire : {Number(ligne.prix_unitaire || 0).toLocaleString("fr-FR")} FCFA</p>
+                              <p className="text-sm text-gray-500">{t('orders.unitPrice', { price: Number(ligne.prix_unitaire || 0).toLocaleString("fr-FR") })} FCFA</p>
                             </div>
                             <div className="text-right">
                               <p className="font-semibold text-gray-900">x{ligne.quantite}</p>
@@ -181,21 +183,21 @@ export default function Orders() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-500 italic">Aucun article trouvé pour cette commande.</p>
+                      <p className="text-gray-500 italic">{t('orders.noArticles')}</p>
                     )}
                   </div>
                 </div>
               ) : (
-                <div className="py-10 text-center text-red-500">Impossible de charger les détails.</div>
+                <div className="py-10 text-center text-red-500">{t('orders.loadError')}</div>
               )}
             </div>
 
             <div className="p-6 border-t border-gray-100 flex justify-end gap-4 bg-gray-50">
               <button onClick={handleUpdateStatus} className="px-6 py-3 rounded-xl border border-gray-300 font-medium text-gray-700 bg-white hover:bg-gray-50">
-                Annuler la commande
+                {t('orders.cancelOrder')}
               </button>
               <button onClick={handleUpdateStatus} className="px-6 py-3 rounded-xl bg-green-500 text-white font-medium hover:bg-green-600">
-                Marquer comme livrée
+                {t('orders.markDelivered')}
               </button>
             </div>
           </div>
