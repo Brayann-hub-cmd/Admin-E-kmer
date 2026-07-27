@@ -163,7 +163,7 @@ export default function Livreurs() {
                       <span className="grid h-10 w-10 place-items-center rounded-full bg-orange-100 text-orange-600"><FaTruck /></span>
                       <div>
                         <p className="font-semibold text-gray-950">{getName(partner)}</p>
-                        <p className="text-sm text-gray-500">{partner.email || "—"}</p>
+                        <p className="text-sm text-gray-500">{partner.user.email || "—"}</p>
                       </div>
                     </div>
                   </td>
