@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import {
   FaUser,
   FaEnvelope,
@@ -19,16 +20,17 @@ const getStoredUser = () => {
   }
 };
 
-const formatRole = (role) => {
+const formatRole = (role, t) => {
   const value = String(role || "").toLowerCase();
-  if (value === "admin") return "Administrateur";
-  if (value.includes("vendeur") || value.includes("seller")) return "Vendeur";
-  if (value.includes("boutique") || value.includes("store")) return "Boutique";
-  if (value.includes("user") || value.includes("acheteur")) return "Acheteur";
-  return role || "Utilisateur";
+  if (value === "admin") return t('profile.roleAdmin');
+  if (value.includes("vendeur") || value.includes("seller")) return t('profile.roleSeller');
+  if (value.includes("boutique") || value.includes("store")) return t('profile.roleBoutique');
+  if (value.includes("user") || value.includes("acheteur")) return t('profile.roleBuyer');
+  return role || t('profile.roleDefault');
 };
 
 export default function Profile() {
+  const { t } = useTranslation();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -73,7 +75,7 @@ export default function Profile() {
     const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        toast.error("L'image ne doit pas dépasser 2 Mo");
+        toast.error(t('profile.imageTooLarge'));
         return;
       }
       
@@ -99,21 +101,21 @@ export default function Profile() {
       let updatedData;
       try {
         updatedData = await authService.updateProfile(payload);
-        toast.success("Profil mis à jour !");
+        toast.success(t('profile.profileUpdated'));
       } catch (err) {
         console.warn("Échec API backend. Sauvegarde locale uniquement :", err);
         const currentUser = getStoredUser();
         const fallbackUser = { ...currentUser, ...payload };
         localStorage.setItem("user", JSON.stringify(fallbackUser));
         updatedData = fallbackUser;
-        toast.success("Profil mis à jour localement !");
+        toast.success(t('profile.profileUpdatedLocal'));
       }
 
       setProfile(updatedData);
       window.dispatchEvent(new Event("storage"));
     } catch (error) {
       console.error(error);
-      toast.error("Erreur lors de la sauvegarde.");
+      toast.error(t('profile.saveError'));
     } finally {
       setIsSaving(false);
     }
@@ -122,19 +124,19 @@ export default function Profile() {
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      toast.error("Les mots de passe ne correspondent pas.");
+      toast.error(t('profile.passwordMismatch'));
       return;
     }
 
     setIsSaving(true);
     try {
-      toast.success("Mot de passe mis à jour !");
+      toast.success(t('profile.passwordUpdated'));
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (error) {
       console.error(error);
-      toast.error("Erreur de mise à jour.");
+      toast.error(t('profile.passwordError'));
     } finally {
       setIsSaving(false);
     }
@@ -151,8 +153,8 @@ export default function Profile() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-950">Mon Profil</h1>
-        <p className="text-gray-500 text-sm mt-1">Gérez vos informations de compte</p>
+        <h1 className="text-2xl font-bold text-gray-950">{t('profile.title')}</h1>
+        <p className="text-gray-500 text-sm mt-1">{t('profile.subtitle')}</p>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row items-center gap-6">
@@ -173,7 +175,7 @@ export default function Profile() {
         <div className="text-center md:text-left space-y-1">
           <h2 className="text-xl font-semibold text-gray-900">{profile?.username || "Administrateur"}</h2>
           <p className="text-gray-500 text-sm flex items-center justify-center md:justify-start gap-2">
-            <FaShieldAlt className="text-orange-500" /> {formatRole(profile?.role)}
+            <FaShieldAlt className="text-orange-500" /> {formatRole(profile?.role, t)}
           </p>
         </div>
       </div>
@@ -189,7 +191,7 @@ export default function Profile() {
                 : "text-gray-600 hover:bg-gray-50"
             }`}
           >
-            Informations
+            {t('profile.infoTab')}
           </button>
           <button
             onClick={() => setActiveTab("security")}
@@ -199,7 +201,7 @@ export default function Profile() {
                 : "text-gray-600 hover:bg-gray-50"
             }`}
           >
-            Mot de passe
+            {t('profile.passwordTab')}
           </button>
         </div>
 
@@ -209,7 +211,7 @@ export default function Profile() {
             <form onSubmit={handleSaveProfile} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-gray-600">Nom complet</label>
+                  <label className="text-xs font-semibold text-gray-600">{t('profile.fullName')}</label>
                   <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
                     <FaUser className="text-gray-400 text-sm" />
                     <input
@@ -223,7 +225,7 @@ export default function Profile() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-gray-600">Adresse Email</label>
+                  <label className="text-xs font-semibold text-gray-600">{t('profile.emailAddress')}</label>
                   <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
                     <FaEnvelope className="text-gray-400 text-sm" />
                     <input
@@ -237,7 +239,7 @@ export default function Profile() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-gray-600">Téléphone</label>
+                  <label className="text-xs font-semibold text-gray-600">{t('profile.phone')}</label>
                   <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
                     <FaPhone className="text-gray-400 text-sm" />
                     <input
@@ -250,13 +252,13 @@ export default function Profile() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-gray-600">Rôle</label>
+                  <label className="text-xs font-semibold text-gray-600">{t('profile.role')}</label>
                   <div className="flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-xl px-3 py-2.5 text-gray-500">
                     <FaShieldAlt className="text-sm" />
                     <input
                       type="text"
                       disabled
-                      value={formatRole(profile?.role)}
+                      value={formatRole(profile?.role, t)}
                       className="bg-transparent outline-none w-full text-sm cursor-not-allowed font-medium"
                     />
                   </div>
@@ -270,7 +272,7 @@ export default function Profile() {
                   className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm shadow-sm transition-all"
                 >
                   <FaSave />
-                  {isSaving ? "Enregistrement..." : "Enregistrer"}
+                  {isSaving ? t('profile.saving') : t('profile.save')}
                 </button>
               </div>
             </form>
@@ -278,7 +280,7 @@ export default function Profile() {
             <form onSubmit={handleUpdatePassword} className="space-y-4">
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-gray-600">Mot de passe actuel</label>
+                  <label className="text-xs font-semibold text-gray-600">{t('profile.currentPassword')}</label>
                   <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
                     <FaKey className="text-gray-400 text-sm" />
                     <input
@@ -293,7 +295,7 @@ export default function Profile() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-gray-600">Nouveau mot de passe</label>
+                    <label className="text-xs font-semibold text-gray-600">{t('profile.newPassword')}</label>
                     <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
                       <FaKey className="text-gray-400 text-sm" />
                       <input
@@ -307,7 +309,7 @@ export default function Profile() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-gray-600">Confirmer le mot de passe</label>
+                    <label className="text-xs font-semibold text-gray-600">{t('profile.confirmPassword')}</label>
                     <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
                       <FaKey className="text-gray-400 text-sm" />
                       <input
@@ -329,7 +331,7 @@ export default function Profile() {
                   className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold px-5 py-2.5 rounded-xl flex items-center gap-2 text-sm shadow-sm transition-all"
                 >
                   <FaSave />
-                  {isSaving ? "Mise à jour..." : "Modifier le mot de passe"}
+                  {isSaving ? t('profile.updatingPassword') : t('profile.updatePassword')}
                 </button>
               </div>
             </form>

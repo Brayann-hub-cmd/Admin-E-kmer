@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FaBan, FaEye, FaSearch, FaTrash, FaTimes, FaMapMarkerAlt, FaUserAlt, FaTags, FaBoxOpen } from "react-icons/fa";
 import { getCategories, getSubCategories } from "../../services/categories.service";
 import { deleteProduct, getProducts, updateProductStatus } from "../../services/products.service";
+import { useTranslation } from 'react-i18next';
 
 const API_ROOT = (import.meta.env.VITE_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
 
@@ -25,6 +26,7 @@ const statusClass = {
 };
 
 export default function Products() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
@@ -116,8 +118,8 @@ export default function Products() {
     <div>
       <div className="flex justify-between items-end mb-10">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-950">Produits</h1>
-          <p className="text-gray-500 mt-1">Supervision des produits</p>
+          <h1 className="text-2xl font-semibold text-gray-950">{t('products.title')}</h1>
+          <p className="text-gray-500 mt-1">{t('products.subtitle')}</p>
         </div>
 
         <div className="flex gap-5">
@@ -125,7 +127,7 @@ export default function Products() {
             <FaSearch className="text-gray-400" />
             <input
               type="text"
-              placeholder="Rechercher un produit..."
+              placeholder={t('products.searchPlaceholder')}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               className="outline-none w-full text-gray-600"
@@ -137,9 +139,9 @@ export default function Products() {
             onChange={(event) => setStatus(event.target.value)}
             className="bg-white border border-gray-200 rounded-2xl px-5 py-3 outline-none shadow-sm"
           >
-            <option value="all">Tous les statuts</option>
-            <option value="Actif">Actif</option>
-            <option value="Suspendu">Suspendu</option>
+            <option value="all">{t('products.allStatuses')}</option>
+            <option value="Actif">{t('products.statusActive')}</option>
+            <option value="Suspendu">{t('products.statusSuspended')}</option>
           </select>
         </div>
       </div>
@@ -148,13 +150,13 @@ export default function Products() {
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="p-5 text-left">Produit</th>
-              <th className="p-5 text-left">Vendeur</th>
-              <th className="p-5 text-left">Catégorie</th>
-              <th className="p-5 text-left">Prix</th>
-              <th className="p-5 text-left">Stock</th>
-              <th className="p-5 text-left">Status</th>
-              <th className="p-5 text-left">Actions</th>
+              <th className="p-5 text-left">{t('products.product')}</th>
+              <th className="p-5 text-left">{t('products.seller')}</th>
+              <th className="p-5 text-left">{t('products.category')}</th>
+              <th className="p-5 text-left">{t('products.price')}</th>
+              <th className="p-5 text-left">{t('products.stock')}</th>
+              <th className="p-5 text-left">{t('products.status')}</th>
+              <th className="p-5 text-left">{t('products.actions')}</th>
             </tr>
           </thead>
 
@@ -177,7 +179,7 @@ export default function Products() {
                       <span className="font-semibold text-gray-950">{product.titre}</span>
                     </div>
                   </td>
-                  <td className="p-5">{product.vendeur?.username || "Vendeur"}</td>
+                  <td className="p-5">{product.vendeur?.username || t('products.seller')}</td>
                   <td className="p-5">{categoryLabel}</td>
                   <td className="p-5 font-medium">{Number(product.prix || 0).toLocaleString("fr-FR")} FCFA</td>
                   <td className="p-5">{product.qte || 0}</td>
@@ -191,21 +193,21 @@ export default function Products() {
                       <button 
                         onClick={() => setSelectedProduct(product)}
                         className="w-11 h-11 rounded-xl bg-blue-100 text-blue-500 inline-flex items-center justify-center hover:bg-blue-200 transition" 
-                        title="Voir"
+                        title={t('products.view')}
                       >
                         <FaEye />
                       </button>
                       <button
                         onClick={() => handleSuspend(product)}
                         className="w-11 h-11 rounded-xl bg-yellow-100 text-yellow-600 inline-flex items-center justify-center hover:bg-yellow-200 transition"
-                        title={productStatus === "Actif" ? "Suspendre" : "Activer"}
+                        title={productStatus === "Actif" ? t('products.suspend') : t('products.activate')}
                       >
                         <FaBan />
                       </button>
                       <button
                         onClick={() => handleDeleteClick(product)}
                         className="w-11 h-11 rounded-xl bg-red-100 text-red-500 inline-flex items-center justify-center hover:bg-red-200 transition"
-                        title="Supprimer"
+                        title={t('products.delete')}
                       >
                         <FaTrash />
                       </button>
@@ -217,7 +219,7 @@ export default function Products() {
             {!filteredProducts.length && (
               <tr>
                 <td colSpan="7" className="p-10 text-center text-gray-500">
-                  Aucun produit trouvé.
+                  {t('products.noProducts')}
                 </td>
               </tr>
             )}
@@ -231,8 +233,8 @@ export default function Products() {
           <div className="bg-white rounded-[28px] w-[800px] max-w-[95vw] max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-semibold text-gray-950">Détails du Produit</h2>
-                <p className="text-gray-500 mt-1">Code: {selectedProduct.code}</p>
+                <h2 className="text-xl font-semibold text-gray-950">{t('products.productDetails')}</h2>
+                <p className="text-gray-500 mt-1">{t('products.code')}: {selectedProduct.code}</p>
               </div>
               <button 
                 onClick={() => setSelectedProduct(null)}
@@ -254,7 +256,7 @@ export default function Products() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      Pas d'image
+                      {t('products.noImage')}
                     </div>
                   )}
                 </div>
@@ -280,8 +282,8 @@ export default function Products() {
                       <FaUserAlt />
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Vendeur</p>
-                      <p className="font-medium text-gray-900">{selectedProduct.vendeur?.username || "Vendeur inconnu"}</p>
+                      <p className="text-xs text-gray-500">{t('products.sellerLabel')}</p>
+                      <p className="font-medium text-gray-900">{selectedProduct.vendeur?.username || t('products.unknownSeller')}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -289,7 +291,7 @@ export default function Products() {
                       <FaTags />
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Catégorie</p>
+                      <p className="text-xs text-gray-500">{t('products.categoryLabel')}</p>
                       <p className="font-medium text-gray-900">{getCategoryLabel(selectedProduct)}</p>
                     </div>
                   </div>
@@ -298,8 +300,8 @@ export default function Products() {
                       <FaBoxOpen />
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Stock</p>
-                      <p className="font-medium text-gray-900">{selectedProduct.qte || 0} unité(s)</p>
+                      <p className="text-xs text-gray-500">{t('products.stockLabel')}</p>
+                      <p className="font-medium text-gray-900">{selectedProduct.qte || 0} {t('products.units')}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -307,16 +309,16 @@ export default function Products() {
                       <FaMapMarkerAlt />
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Localisation</p>
+                      <p className="text-xs text-gray-500">{t('products.location')}</p>
                       <p className="font-medium text-gray-900 line-clamp-1" title={selectedProduct.localisation}>{selectedProduct.localisation || "-"}</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Description</h4>
+                  <h4 className="font-medium text-gray-900 mb-2">{t('products.description')}</h4>
                   <p className="text-gray-600 text-sm whitespace-pre-wrap leading-relaxed">
-                    {selectedProduct.description || "Aucune description fournie."}
+                    {selectedProduct.description || t('products.noDescription')}
                   </p>
                 </div>
               </div>
@@ -330,7 +332,7 @@ export default function Products() {
                 }} 
                 className="px-6 py-3 rounded-xl border border-gray-300 font-medium text-gray-700 bg-white hover:bg-gray-50"
               >
-                {normalizeStatus(selectedProduct.statut) === "Actif" ? "Suspendre le produit" : "Réactiver le produit"}
+                {normalizeStatus(selectedProduct.statut) === "Actif" ? t('products.suspendProduct') : t('products.activateProduct')}
               </button>
             </div>
           </div>
@@ -343,12 +345,12 @@ export default function Products() {
           <div className="bg-white w-[520px] max-w-full rounded-3xl p-8">
             <div className="flex justify-between mb-6">
               <div>
-                <h2 className="text-xl font-semibold text-red-600">Supprimer le produit</h2>
+                <h2 className="text-xl font-semibold text-red-600">{t('products.deleteProduct')}</h2>
                 <p className="text-gray-500 mt-1">
-                  Voulez-vous vraiment supprimer le produit <span className="font-semibold text-gray-950">"{productToDelete.titre}"</span> ?
+                  {t('products.deleteProductConfirm', { name: productToDelete.titre })}
                 </p>
                 <p className="text-sm text-gray-400 mt-2">
-                  Cette action est irréversible et retirera le produit de la marketplace.
+                  {t('products.deleteProductWarning')}
                 </p>
               </div>
               <button 
@@ -364,13 +366,13 @@ export default function Products() {
                 onClick={() => setProductToDelete(null)} 
                 className="px-6 py-3 rounded-xl border font-medium text-gray-700 hover:bg-gray-50"
               >
-                Annuler
+                {t('products.cancel')}
               </button>
               <button 
                 onClick={confirmDeleteProduct} 
                 className="px-6 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium"
               >
-                Confirmer la suppression
+                {t('products.confirmDelete')}
               </button>
             </div>
           </div>

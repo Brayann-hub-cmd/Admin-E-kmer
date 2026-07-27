@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { getSales } from "../../services/sales.service";
 import { getUsers } from "../../services/users.service";
 
@@ -35,6 +36,7 @@ const extractRows = (sales) =>
   });
 
 export default function Sales() {
+  const { t } = useTranslation();
   const [sales, setSales] = useState([]);
   const [users, setUsers] = useState([]);
 
@@ -64,21 +66,21 @@ export default function Sales() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-950">Ventes</h1>
-        <p className="text-gray-500 mt-1">Activité des vendeurs et commissions plateforme</p>
+        <h1 className="text-2xl font-semibold text-gray-950">{t('sales.title')}</h1>
+        <p className="text-gray-500 mt-1">{t('sales.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <p className="text-gray-500">Total ventes</p>
+          <p className="text-gray-500">{t('sales.totalSales')}</p>
           <h2 className="text-2xl font-semibold mt-3 text-gray-950">{formatCurrency(totalSales)}</h2>
         </div>
         <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <p className="text-gray-500">Revenus commissions</p>
+          <p className="text-gray-500">{t('sales.commissionRevenue')}</p>
           <h2 className="text-2xl font-semibold mt-3 text-gray-950">{formatCurrency(totalCommission)}</h2>
         </div>
         <div className="bg-white rounded-2xl p-6 shadow-sm">
-          <p className="text-gray-500">Vendeurs actifs</p>
+          <p className="text-gray-500">{t('sales.activeSellers')}</p>
           <h2 className="text-2xl font-semibold mt-3 text-gray-950">{activeSellers}</h2>
         </div>
       </div>
@@ -87,11 +89,11 @@ export default function Sales() {
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="p-4 text-left">Produit</th>
-              <th className="p-4 text-left">Vendeur</th>
-              <th className="p-4 text-left">Montant</th>
-              <th className="p-4 text-left">Commission</th>
-              <th className="p-4 text-left">Statut</th>
+              <th className="p-4 text-left">{t('sales.product')}</th>
+              <th className="p-4 text-left">{t('sales.seller')}</th>
+              <th className="p-4 text-left">{t('sales.amount')}</th>
+              <th className="p-4 text-left">{t('sales.commission')}</th>
+              <th className="p-4 text-left">{t('sales.statut')}</th>
             </tr>
           </thead>
           <tbody>
@@ -111,7 +113,7 @@ export default function Sales() {
             {!rows.length && (
               <tr>
                 <td colSpan="5" className="p-10 text-center text-gray-500">
-                  Aucune vente trouvée.
+                  {t('sales.noSales')}
                 </td>
               </tr>
             )}

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from "../../services/auth.service";
+import { useTranslation } from 'react-i18next';
 
 export default function AdminLogin() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -24,7 +26,7 @@ export default function AdminLogin() {
       const { token, user } = res.data;
 
       if (user.role !== "admin") {
-        setError("Accès réservé aux administrateurs");
+        setError(t('adminLogin.adminOnly'));
         return;
       }
 
@@ -35,7 +37,7 @@ export default function AdminLogin() {
     } catch (err) {
       setError(
         err?.response?.data?.error ||
-          "Email ou mot de passe incorrect"
+          t('adminLogin.invalidCredentials')
       );
     } finally {
       setLoading(false);
@@ -48,7 +50,7 @@ export default function AdminLogin() {
       <div className="bg-white p-8 rounded-2xl shadow-lg w-[420px]">
 
         <h1 className="text-2xl font-semibold text-center mb-6 text-gray-950">
-          Admin E-Kmer
+          {t('adminLogin.title')}
         </h1>
 
         {error && (
@@ -60,7 +62,7 @@ export default function AdminLogin() {
         <form onSubmit={handleSubmit}>
 
           <div className="mb-4">
-            <label>Email</label>
+            <label>{t('adminLogin.email')}</label>
 
             <input
               type="email"
@@ -71,7 +73,7 @@ export default function AdminLogin() {
           </div>
 
           <div className="mb-5">
-            <label>Mot de passe</label>
+            <label>{t('adminLogin.password')}</label>
 
             <input
               type="password"
@@ -85,7 +87,7 @@ export default function AdminLogin() {
             disabled={loading}
             className="w-full bg-orange-500 text-white py-3 rounded-lg"
           >
-            {loading ? "Connexion..." : "Se connecter"}
+            {loading ? t('adminLogin.logging') : t('adminLogin.login')}
           </button>
 
         </form>

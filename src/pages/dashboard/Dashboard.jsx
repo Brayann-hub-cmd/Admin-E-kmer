@@ -19,6 +19,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useTranslation } from "react-i18next";
 import { getDashboardStats } from "../../services/dashboard.service";
 
 const statusClass = {
@@ -58,6 +59,7 @@ function DashboardCard({ icon, iconClass, value, label }) {
 }
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const [dashboard, setDashboard] = useState(null);
 
   useEffect(() => {
@@ -70,31 +72,31 @@ export default function Dashboard() {
   }, []);
 
   if (!dashboard) {
-    return <div className="flex justify-center items-center h-[60vh] text-gray-500">Chargement...</div>;
+    return <div className="flex justify-center items-center h-[60vh] text-gray-500">{t('dashboard.loading')}</div>;
   }
 
   // Prepare les quatre KPI affiches en haut de la page.
   const cards = [
     {
-      label: "Volume des ventes",
+      label: t('dashboard.volumeVentes'),
       value: formatCurrency(dashboard.volumeVentes),
       icon: <FaWallet />,
       iconClass: "bg-orange-100 text-orange-500",
     },
     {
-      label: "Commandes",
+      label: t('dashboard.commandes'),
       value: Number(dashboard.nbCommandes).toLocaleString("fr-FR"),
       icon: <FaShoppingCart />,
       iconClass: "bg-purple-100 text-purple-500",
     },
     {
-      label: "Utilisateurs actifs",
+      label: t('dashboard.utilisateursActifs'),
       value: Number(dashboard.utilisateursActifs).toLocaleString("fr-FR"),
       icon: <FaUsers />,
       iconClass: "bg-green-100 text-green-500",
     },
     {
-      label: "Panier moyen",
+      label: t('dashboard.panierMoyen'),
       value: formatCurrency(dashboard.panierMoyen),
       icon: <FaChartPie />,
       iconClass: "bg-blue-100 text-blue-500",
@@ -114,12 +116,12 @@ export default function Dashboard() {
         <section className="bg-white rounded-3xl p-7 shadow-sm min-h-[548px]">
           <div className="flex items-start justify-between mb-8">
             <div>
-              <h2 className="font-semibold text-xl text-gray-950">Activité de la marketplace</h2>
-              <p className="text-gray-500 mt-2">Suivi global des transactions et échanges</p>
+              <h2 className="font-semibold text-xl text-gray-950">{t('dashboard.activiteMarketplace')}</h2>
+              <p className="text-gray-500 mt-2">{t('dashboard.suiviGlobal')}</p>
             </div>
             <select className="border border-gray-200 rounded-xl px-5 py-3 outline-none bg-white">
-              <option>7 derniers jours</option>
-              <option>30 derniers jours</option>
+              <option>{t('dashboard.sevenDays')}</option>
+              <option>{t('dashboard.thirtyDays')}</option>
             </select>
           </div>
 
@@ -154,9 +156,9 @@ export default function Dashboard() {
         {/* Commandes recentes construites depuis les ventes renvoyees par l'API. */}
         <section className="bg-white rounded-3xl p-7 shadow-sm min-h-[548px]">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="font-semibold text-xl text-gray-950">Commandes récentes</h2>
+            <h2 className="font-semibold text-xl text-gray-950">{t('dashboard.commandesRecentes')}</h2>
             <Link to="/commandes" className="text-orange-500 font-semibold">
-              Voir tout
+              {t('dashboard.voirTout')}
             </Link>
           </div>
 
@@ -176,7 +178,7 @@ export default function Dashboard() {
               </div>
             ))}
             {!dashboard.commandesRecentes.length && (
-              <p className="text-center text-gray-500 py-10">Aucune commande récente.</p>
+              <p className="text-center text-gray-500 py-10">{t('dashboard.aucuneCommande')}</p>
             )}
           </div>
         </section>
@@ -186,9 +188,9 @@ export default function Dashboard() {
         {/* Produits les plus vendus selon les lignes de ventes disponibles. */}
         <section className="bg-white rounded-3xl p-7 shadow-sm min-h-[472px]">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="font-semibold text-xl text-gray-950">Top produits</h2>
+            <h2 className="font-semibold text-xl text-gray-950">{t('dashboard.topProduits')}</h2>
             <Link to="/produits" className="text-orange-500 font-semibold">
-              Voir tout
+              {t('dashboard.voirTout')}
             </Link>
           </div>
           <div className="space-y-7">
@@ -196,21 +198,21 @@ export default function Dashboard() {
               <div key={product.code} className="flex justify-between gap-4">
                 <div>
                   <p className="font-semibold">{product.titre}</p>
-                  <p className="text-gray-500 mt-1">{product.ventes || product.qte || 0} ventes</p>
+                  <p className="text-gray-500 mt-1">{product.ventes || product.qte || 0} {t('dashboard.ventes')}</p>
                 </div>
                 <p className="font-semibold whitespace-nowrap">{formatCurrency(product.total || product.prix)}</p>
               </div>
             ))}
             {!dashboard.topProduits.length && (
-              <p className="text-center text-gray-500 py-10">Aucun produit à afficher.</p>
+              <p className="text-center text-gray-500 py-10">{t('dashboard.aucunProduit')}</p>
             )}
           </div>
         </section>
 
         {/* Repartition des produits par categorie/sous-categorie. */}
         <section className="bg-white rounded-3xl p-7 shadow-sm min-h-[472px]">
-          <h2 className="font-semibold text-xl text-gray-950">Ventes par catégorie</h2>
-          <p className="text-gray-500 mt-2">Répartition des ventes marketplace</p>
+          <h2 className="font-semibold text-xl text-gray-950">{t('dashboard.ventesParCategorie')}</h2>
+          <p className="text-gray-500 mt-2">{t('dashboard.repartitionVentes')}</p>
           {dashboard.ventesParCategorie.length ? (
             <>
               <div className="relative h-[280px] mt-4">
@@ -240,15 +242,15 @@ export default function Dashboard() {
             </>
           ) : (
             <div className="h-[350px] flex items-center justify-center text-gray-500">
-              Aucune donnée catégorie.
+              {t('dashboard.aucuneDonneeCategorie')}
             </div>
           )}
         </section>
 
         {/* Flux recent melangeant commandes et nouveaux utilisateurs. */}
         <section className="bg-white rounded-3xl p-7 shadow-sm min-h-[472px]">
-          <h2 className="font-semibold text-xl text-gray-950">Activités récentes</h2>
-          <p className="text-gray-500 mt-2 mb-8">Dernières actions marketplace</p>
+          <h2 className="font-semibold text-xl text-gray-950">{t('dashboard.activitesRecentes')}</h2>
+          <p className="text-gray-500 mt-2 mb-8">{t('dashboard.dernieresActions')}</p>
           <div className="space-y-7 max-h-[330px] overflow-y-auto pr-3">
             {dashboard.activitesRecentes.map((activity, index) => {
               const icon = activityIcon[activity.type] || activityIcon.utilisateur;
@@ -266,7 +268,7 @@ export default function Dashboard() {
               );
             })}
             {!dashboard.activitesRecentes.length && (
-              <p className="text-center text-gray-500 py-10">Aucune activité récente.</p>
+              <p className="text-center text-gray-500 py-10">{t('dashboard.aucuneActivite')}</p>
             )}
           </div>
         </section>
